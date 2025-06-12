@@ -166,6 +166,7 @@ endif;
 ?> />
 						<label for="burnafterreading"><?php echo I18n::_('Burn after reading'); ?></label>
 					</div>
+<!--
 <?php
 if ($DISCUSSION):
 ?>
@@ -177,6 +178,7 @@ if ($DISCUSSION):
 ?> />
 						<label for="opendiscussion"><?php echo I18n::_('Open discussion'); ?></label>
 					</div>
+-->
 <?php
 endif;
 if ($PASSWORD):
