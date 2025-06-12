@@ -639,7 +639,7 @@ endif;
 			</section>
 			<footer class="container">
 				<div class="row">
-					<h4 class="col-md-5 col-xs-8"><?php echo I18n::_($NAME); ?> <small>- <?php echo I18n::_('Because ignorance is bliss'); ?></small></h4>
+					<h4 class="col-md-5 col-xs-8"><?php echo I18n::_($NAME); ?> <small><?php echo I18n::_(''); ?></small></h4>
 					<p class="col-md-1 col-xs-4 text-center"><?php echo $VERSION; ?></p>
 					<p id="aboutbox" class="col-md-6 col-xs-12">
 						<?php echo sprintf(
