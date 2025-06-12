@@ -4,15 +4,15 @@ $isCpct = substr($template, 9, 8) === '-compact';
 $isDark = substr($template, 9, 5) === '-dark';
 $isPage = substr($template, -5) === '-page';
 ?><!DOCTYPE html>
-<html lang="<?php echo I18n::getLanguage(); ?>"<?php echo I18n::isRtl() ? ' dir="rtl"' : ''; ?>>
-	<head>
-		<meta charset="utf-8" />
-		<meta http-equiv="Content-Security-Policy" content="<?php echo I18n::encode($CSPHEADER); ?>">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta name="robots" content="noindex" />
-		<meta name="google" content="notranslate">
-		<title><?php echo I18n::_($NAME); ?></title>
+<html lang="en"<?php echo I18n::isRtl() ? ' dir="rtl"' : ''; ?>>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Security-Policy" content="<?php echo I18n::encode($CSPHEADER); ?>">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noindex" />
+        <meta name="google" content="notranslate">
+        <title><?php echo I18n::_($NAME); ?></title>
 <?php
 if (!$isDark) :
 ?>
