@@ -178,9 +178,9 @@ if ($DISCUSSION):
 ?> />
 						<label for="opendiscussion"><?php echo I18n::_('Open discussion'); ?></label>
 					</div>
--->
 <?php
 endif;
+-->
 if ($PASSWORD):
 ?>
 					<div id="password" class="hidden">
