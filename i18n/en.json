@@ -1,8 +1,6 @@
 {
-    "PrivateBin": "PrivateBin",
-    "%s is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.": "%s is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.",
-    "More information on the <a href=\"https://privatebin.info/\">project page</a>.": "More information on the <a href=\"https://privatebin.info/\">project page</a>.",
-    "Because ignorance is bliss": "Because ignorance is bliss",
+    "PrivateBin": "PassVault",
+    "%s is based on PrivateBin and is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.": "%s is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.",
     "Paste does not exist, has expired or has been deleted.": "Paste does not exist, has expired or has been deleted.",
     "%s requires php %s or above to work. Sorry.": "%s requires php %s or above to work. Sorry.",
     "%s requires configuration section [%s] to be present in configuration file.": "%s requires configuration section [%s] to be present in configuration file.",
@@ -226,6 +224,5 @@
     "Copy link": "Copy link",
     "Link copied to clipboard": "Link copied to clipboard",
     "Paste text": "Paste text",
-    "Tabulator key serves as character (Hit <kbd>Ctrl</kbd>+<kbd>m</kbd> or <kbd>Esc</kbd> to toggle)": "Tabulator key serves as character (Hit <kbd>Ctrl</kbd>+<kbd>m</kbd> or <kbd>Esc</kbd> to toggle)",
     "Theme": "Theme"
 }
