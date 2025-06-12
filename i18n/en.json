@@ -1,6 +1,6 @@
 {
     "PrivateBin": "PassVault",
-    "%s is based on PrivateBin and is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.": "%s is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.",
+    "%s is based on PrivateBin and is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.": "%s is based on PrivateBin and is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.",
     "Paste does not exist, has expired or has been deleted.": "Paste does not exist, has expired or has been deleted.",
     "%s requires php %s or above to work. Sorry.": "%s requires php %s or above to work. Sorry.",
     "%s requires configuration section [%s] to be present in configuration file.": "%s requires configuration section [%s] to be present in configuration file.",
