@@ -1,14 +1,14 @@
 <?php declare(strict_types=1);
 use PrivateBin\I18n;
 ?><!DOCTYPE html>
-<html lang="<?php echo I18n::getLanguage(); ?>"<?php echo I18n::isRtl() ? ' dir="rtl"' : ''; ?>>
-	<head>
-		<meta charset="utf-8" />
-		<meta http-equiv="Content-Security-Policy" content="<?php echo I18n::encode($CSPHEADER); ?>">
-		<meta name="robots" content="noindex" />
-		<meta name="google" content="notranslate">
-		<title><?php echo I18n::_($NAME); ?></title>
-		<link type="text/css" rel="stylesheet" href="css/privatebin.css?<?php echo rawurlencode($VERSION); ?>" />
+<html lang="en"<?php echo I18n::isRtl() ? ' dir="rtl"' : ''; ?>>
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Security-Policy" content="<?php echo I18n::encode($CSPHEADER); ?>">
+        <meta name="robots" content="noindex" />
+        <meta name="google" content="notranslate">
+        <title><?php echo I18n::_($NAME); ?></title>
+        <link type="text/css" rel="stylesheet" href="css/privatebin.css?<?php echo rawurlencode($VERSION); ?>" />
 <?php
 if ($SYNTAXHIGHLIGHTING):
 ?>
@@ -78,7 +78,7 @@ endif;
 		<header>
 			<div id="aboutbox">
 				<?php echo sprintf(
-                    I18n::_('%s is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.',
+                    I18n::_('%s is a is based on PrivateBin and is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.malist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.',
                         I18n::_($NAME),
                         '%s', '%s'
                     ),
