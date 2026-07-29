@@ -602,10 +602,10 @@ jQuery.PrivateBin = (function($, RawDeflate) {
                 secondsToExpiration = me.durationToSeconds(expirationDisplayStringOrSecondsToExpire);
             }
 
-            if (typeof secondsToExpiration !== 'number') {
-                throw new Error('Cannot calculate expiration date.');
+            if (typeof secondsToExpiration !== 'number' || !Number.isFinite(secondsToExpiration)) {
+                return null;
             }
-            if (secondsToExpiration === 0) {
+            if (secondsToExpiration <= 0) {
                 return null;
             }
 
@@ -3838,10 +3838,11 @@ jQuery.PrivateBin = (function($, RawDeflate) {
         {
             // get selected option
             const target = $(event.target);
+            const expirationValue = target.data('expiration') || target.attr('value') || target.text();
 
             // update dropdown display and save new expiration time
             $('#pasteExpirationDisplay').text(target.text());
-            pasteExpiration = target.data('expiration');
+            pasteExpiration = expirationValue;
 
             event.preventDefault();
         }
@@ -4385,23 +4386,18 @@ jQuery.PrivateBin = (function($, RawDeflate) {
          */
         me.showEmailButton = function(optionalRemainingTimeInSeconds)
         {
-            try {
-                // we cache expiration date in closure to avoid inaccurate expiration datetime
-                const expirationDate = Helper.calculateExpirationDate(
-                    new Date(),
-                    typeof optionalRemainingTimeInSeconds === 'number' ? optionalRemainingTimeInSeconds : TopNav.getExpiration()
-                );
-                const isBurnafterreading = TopNav.getBurnAfterReading();
+            // we cache expiration date in closure to avoid inaccurate expiration datetime
+            const expirationDate = Helper.calculateExpirationDate(
+                new Date(),
+                typeof optionalRemainingTimeInSeconds === 'number' ? optionalRemainingTimeInSeconds : TopNav.getExpiration()
+            );
+            const isBurnafterreading = TopNav.getBurnAfterReading();
 
-                $emailLink.removeClass('hidden');
-                $emailLink.off('click.sendEmail');
-                $emailLink.on('click.sendEmail', () => {
-                    sendEmail(expirationDate, isBurnafterreading);
-                });
-            } catch (error) {
-                console.error(error);
-                Alert.showError('Cannot calculate expiration date.');
-            }
+            $emailLink.removeClass('hidden');
+            $emailLink.off('click.sendEmail');
+            $emailLink.on('click.sendEmail', () => {
+                sendEmail(expirationDate, isBurnafterreading);
+            });
         }
 
         /**
@@ -4745,6 +4741,9 @@ jQuery.PrivateBin = (function($, RawDeflate) {
             // bootstrap5 & page drop downs
             $('#pasteExpiration').on('change', function() {
                 pasteExpiration = Model.getExpirationDefault();
+                if (typeof pasteExpiration === 'string') {
+                    pasteExpiration = pasteExpiration.trim();
+                }
             });
             $('#pasteFormatter').on('change', function() {
                 PasteViewer.setFormat(Model.getFormatDefault());
@@ -4758,6 +4757,9 @@ jQuery.PrivateBin = (function($, RawDeflate) {
             burnAfterReadingDefault = me.getBurnAfterReading();
             openDiscussionDefault = me.getOpenDiscussion();
             pasteExpiration = Model.getExpirationDefault();
+            if (typeof pasteExpiration === 'string') {
+                pasteExpiration = pasteExpiration.trim();
+            }
 
             createButtonsDisplayed = false;
             viewButtonsDisplayed = false;
