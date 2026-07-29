@@ -609,10 +609,10 @@ jQuery.PrivateBin = (function($, RawDeflate) {
                 secondsToExpiration = me.durationToSeconds(expirationDisplayStringOrSecondsToExpire);
             }
 
-            if (typeof secondsToExpiration !== 'number') {
-                throw new Error('Cannot calculate expiration date.');
+            if (typeof secondsToExpiration !== 'number' || !Number.isFinite(secondsToExpiration)) {
+                return null;
             }
-            if (secondsToExpiration === 0) {
+            if (secondsToExpiration <= 0) {
                 return null;
             }
 

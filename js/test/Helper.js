@@ -53,6 +53,13 @@ describe('Helper', function () {
         });
     });
 
+    describe('calculateExpirationDate', function () {
+        it('returns null for unparsable expiration values instead of throwing', function () {
+            assert.strictEqual($.PrivateBin.Helper.calculateExpirationDate(new Date('2024-01-01T00:00:00Z'), '3days'), 1704067200000);
+            assert.strictEqual($.PrivateBin.Helper.calculateExpirationDate(new Date('2024-01-01T00:00:00Z'), 'not-a-duration'), null);
+        });
+    });
+
     // this test is not yet meaningful using jsdom, as it does not contain getSelection support.
     // TODO: This needs to be tested using a browser.
     describe('selectText', function () {
