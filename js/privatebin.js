@@ -368,14 +368,39 @@ jQuery.PrivateBin = (function($, RawDeflate) {
          */
         me.durationToSeconds = function(duration)
         {
-            let pieces   = duration.split(/(\D+)/),
-                factor   = pieces[0] || 0,
-                timespan = pieces[1] || pieces[0];
+            if (typeof duration === 'number') {
+                return duration;
+            }
+            if (typeof duration !== 'string') {
+                return 0;
+            }
+
+            const normalized = duration.trim().toLowerCase();
+            if (/^\d+$/.test(normalized)) {
+                return parseInt(normalized, 10);
+            }
+
+            const match = normalized.match(/^(\d+)\s*(sec|secs|second|seconds|min|mins|minute|minutes|hour|hours|day|days|week|weeks|month|months|year|years|never)$/);
+            if (!match) {
+                return 0;
+            }
+
+            const factor = parseInt(match[1], 10);
+            const timespan = match[2];
             switch (timespan)
             {
+                case 'sec':
+                case 'secs':
+                case 'second':
+                case 'seconds':
+                    return factor;
                 case 'min':
+                case 'mins':
+                case 'minute':
+                case 'minutes':
                     return factor * minute;
                 case 'hour':
+                case 'hours':
                     return factor * hour;
                 case 'day':
                 case 'days':
@@ -392,7 +417,7 @@ jQuery.PrivateBin = (function($, RawDeflate) {
                 case 'never':
                     return 0;
                 default:
-                    return factor;
+                    return 0;
             }
         };
 
