@@ -43,6 +43,12 @@ describe('Helper', function () {
         });
     });
 
+    describe('durationToSeconds', function () {
+        it('supports plural day values such as 3days', function () {
+            assert.strictEqual($.PrivateBin.Helper.durationToSeconds('3days'), 259200);
+        });
+    });
+
     // this test is not yet meaningful using jsdom, as it does not contain getSelection support.
     // TODO: This needs to be tested using a browser.
     describe('selectText', function () {

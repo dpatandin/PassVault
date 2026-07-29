@@ -378,12 +378,16 @@ jQuery.PrivateBin = (function($, RawDeflate) {
                 case 'hour':
                     return factor * hour;
                 case 'day':
+                case 'days':
                     return factor * day;
                 case 'week':
+                case 'weeks':
                     return factor * week;
                 case 'month':
+                case 'months':
                     return factor * month;
                 case 'year':
+                case 'years':
                     return factor * year;
                 case 'never':
                     return 0;
