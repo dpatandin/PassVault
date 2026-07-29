@@ -368,56 +368,27 @@ jQuery.PrivateBin = (function($, RawDeflate) {
          */
         me.durationToSeconds = function(duration)
         {
-            if (typeof duration === 'number') {
-                return duration;
-            }
-            if (typeof duration !== 'string') {
-                return 0;
-            }
-
-            const normalized = duration.trim().toLowerCase();
-            if (/^\d+$/.test(normalized)) {
-                return parseInt(normalized, 10);
-            }
-
-            const match = normalized.match(/^(\d+)\s*(sec|secs|second|seconds|min|mins|minute|minutes|hour|hours|day|days|week|weeks|month|months|year|years|never)$/);
-            if (!match) {
-                return 0;
-            }
-
-            const factor = parseInt(match[1], 10);
-            const timespan = match[2];
+            let pieces   = duration.split(/(\D+)/),
+                factor   = pieces[0] || 0,
+                timespan = pieces[1] || pieces[0];
             switch (timespan)
             {
-                case 'sec':
-                case 'secs':
-                case 'second':
-                case 'seconds':
-                    return factor;
                 case 'min':
-                case 'mins':
-                case 'minute':
-                case 'minutes':
                     return factor * minute;
                 case 'hour':
-                case 'hours':
                     return factor * hour;
                 case 'day':
-                case 'days':
                     return factor * day;
                 case 'week':
-                case 'weeks':
                     return factor * week;
                 case 'month':
-                case 'months':
                     return factor * month;
                 case 'year':
-                case 'years':
                     return factor * year;
                 case 'never':
                     return 0;
                 default:
-                    return 0;
+                    return factor;
             }
         };
 
@@ -609,10 +580,10 @@ jQuery.PrivateBin = (function($, RawDeflate) {
                 secondsToExpiration = me.durationToSeconds(expirationDisplayStringOrSecondsToExpire);
             }
 
-            if (typeof secondsToExpiration !== 'number' || !Number.isFinite(secondsToExpiration)) {
-                return null;
+            if (typeof secondsToExpiration !== 'number') {
+                throw new Error('Cannot calculate expiration date.');
             }
-            if (secondsToExpiration <= 0) {
+            if (secondsToExpiration === 0) {
                 return null;
             }
 
@@ -4392,18 +4363,23 @@ jQuery.PrivateBin = (function($, RawDeflate) {
          */
         me.showEmailButton = function(optionalRemainingTimeInSeconds)
         {
-            // we cache expiration date in closure to avoid inaccurate expiration datetime
-            const expirationDate = Helper.calculateExpirationDate(
-                new Date(),
-                typeof optionalRemainingTimeInSeconds === 'number' ? optionalRemainingTimeInSeconds : TopNav.getExpiration()
-            );
-            const isBurnafterreading = TopNav.getBurnAfterReading();
+            try {
+                // we cache expiration date in closure to avoid inaccurate expiration datetime
+                const expirationDate = Helper.calculateExpirationDate(
+                    new Date(),
+                    typeof optionalRemainingTimeInSeconds === 'number' ? optionalRemainingTimeInSeconds : TopNav.getExpiration()
+                );
+                const isBurnafterreading = TopNav.getBurnAfterReading();
 
-            $emailLink.removeClass('hidden');
-            $emailLink.off('click.sendEmail');
-            $emailLink.on('click.sendEmail', () => {
-                sendEmail(expirationDate, isBurnafterreading);
-            });
+                $emailLink.removeClass('hidden');
+                $emailLink.off('click.sendEmail');
+                $emailLink.on('click.sendEmail', () => {
+                    sendEmail(expirationDate, isBurnafterreading);
+                });
+            } catch (error) {
+                console.error(error);
+                Alert.showError('Cannot calculate expiration date.');
+            }
         }
 
         /**
