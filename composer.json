@@ -24,7 +24,7 @@
 		"docs" : "https://privatebin.info/codedoc/"
 	},
 	"require" : {
-		"php": "^7.3 || ^8.0",
+		"php": "^8.2",
 		"jdenticon/jdenticon": "1.0.2",
 		"mlocati/ip-lib": "1.20.0",
 		"symfony/polyfill-php80": "1.31.0",
@@ -48,7 +48,7 @@
 		"preferred-install": "dist",
 		"sort-packages": true,
 		"platform": {
-			"php": "7.3"
+			"php": "8.2"
 		}
 	}
 }
