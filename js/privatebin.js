@@ -4392,23 +4392,18 @@ jQuery.PrivateBin = (function($, RawDeflate) {
          */
         me.showEmailButton = function(optionalRemainingTimeInSeconds)
         {
-            try {
-                // we cache expiration date in closure to avoid inaccurate expiration datetime
-                const expirationDate = Helper.calculateExpirationDate(
-                    new Date(),
-                    typeof optionalRemainingTimeInSeconds === 'number' ? optionalRemainingTimeInSeconds : TopNav.getExpiration()
-                );
-                const isBurnafterreading = TopNav.getBurnAfterReading();
+            // we cache expiration date in closure to avoid inaccurate expiration datetime
+            const expirationDate = Helper.calculateExpirationDate(
+                new Date(),
+                typeof optionalRemainingTimeInSeconds === 'number' ? optionalRemainingTimeInSeconds : TopNav.getExpiration()
+            );
+            const isBurnafterreading = TopNav.getBurnAfterReading();
 
-                $emailLink.removeClass('hidden');
-                $emailLink.off('click.sendEmail');
-                $emailLink.on('click.sendEmail', () => {
-                    sendEmail(expirationDate, isBurnafterreading);
-                });
-            } catch (error) {
-                console.error(error);
-                Alert.showError('Cannot calculate expiration date.');
-            }
+            $emailLink.removeClass('hidden');
+            $emailLink.off('click.sendEmail');
+            $emailLink.on('click.sendEmail', () => {
+                sendEmail(expirationDate, isBurnafterreading);
+            });
         }
 
         /**
