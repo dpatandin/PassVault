@@ -373,6 +373,11 @@ jQuery.PrivateBin = (function($, RawDeflate) {
                 return 0;
             }
 
+            const numericValue = Number(normalized);
+            if (Number.isFinite(numericValue)) {
+                return Math.max(0, numericValue);
+            }
+
             const match = normalized.match(/^(\d+)\s*(sec|secs|second|seconds|min|mins|minute|minutes|hour|hours|day|days|week|weeks|month|months|year|years|never)$/);
             if (!match) {
                 return 0;

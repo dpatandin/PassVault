@@ -69,9 +69,18 @@ class View
     {
         $sri = array_key_exists($file, $this->_variables['SRI']) ?
             ' integrity="' . $this->_variables['SRI'][$file] . '"' : '';
-        // if the file isn't versioned (ends in a digit), add our own version
-        $cacheBuster = (bool) preg_match('#[0-9]\.js$#', (string) $file) ?
-            '' : '?' . rawurlencode($this->_variables['VERSION']);
+        $cacheBuster = '';
+        $absoluteFile = PATH . $file;
+
+        // if the file isn't versioned (ends in a digit), add a cache-busting query string
+        if ((bool) preg_match('#[0-9]\.js$#', (string) $file)) {
+            $cacheBuster = '';
+        } else {
+            $cacheBuster = is_file($absoluteFile) ?
+                '?v=' . rawurlencode((string) filemtime($absoluteFile)) :
+                '?' . rawurlencode($this->_variables['VERSION']);
+        }
+
         echo '<script ', $attributes,
         ' type="text/javascript" data-cfasync="false" src="', $file,
         $cacheBuster, '"', $sri, ' crossorigin="anonymous"></script>', PHP_EOL;

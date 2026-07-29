@@ -51,6 +51,11 @@ describe('Helper', function () {
         it('supports spaced values such as 3 days', function () {
             assert.strictEqual($.PrivateBin.Helper.durationToSeconds('3 days'), 259200);
         });
+
+        it('accepts numeric seconds values directly', function () {
+            assert.strictEqual($.PrivateBin.Helper.durationToSeconds('259200'), 259200);
+            assert.strictEqual($.PrivateBin.Helper.durationToSeconds(259200), 259200);
+        });
     });
 
     describe('calculateExpirationDate', function () {
