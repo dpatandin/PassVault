@@ -60,7 +60,7 @@ describe('Helper', function () {
 
     describe('calculateExpirationDate', function () {
         it('returns null for unparsable expiration values instead of throwing', function () {
-            assert.strictEqual($.PrivateBin.Helper.calculateExpirationDate(new Date('2024-01-01T00:00:00Z'), '3days'), 1704067200000);
+            assert.strictEqual($.PrivateBin.Helper.calculateExpirationDate(new Date('2024-01-01T00:00:00Z'), '3days'), 1704326400000);
             assert.strictEqual($.PrivateBin.Helper.calculateExpirationDate(new Date('2024-01-01T00:00:00Z'), 'not-a-duration'), null);
         });
     });
