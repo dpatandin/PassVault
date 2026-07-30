@@ -70,6 +70,7 @@ template = "bootstrap5"
 ; (optional) info text to display
 ; use single, instead of double quotes for HTML attributes
 ; info = "More information on the <a href='https://privatebin.info/'>project page</a>."
+info = ""
 
 ; (optional) notice to display
 ; notice = "Note: This is a test service: Data may be deleted anytime. Kittens will die if you abuse this service."
