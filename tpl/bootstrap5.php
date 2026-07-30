@@ -523,7 +523,7 @@ endif;
                             I18n::_($NAME),
                             '%s', '%s'
                         ),
-                        '<i>', '</i>'), ' ', $INFO, PHP_EOL;
+                        '<i>', '</i>'), PHP_EOL;
                     ?>
 				</p>
 			</div>
