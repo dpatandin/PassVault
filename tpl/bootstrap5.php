@@ -10,7 +10,7 @@ use PrivateBin\I18n;
 		<meta name="robots" content="noindex" />
 		<meta name="google" content="notranslate">
 		<title><?php echo I18n::_($NAME); ?></title>
-		<link type="text/css" rel="stylesheet" href="css/bootstrap5/bootstrap<?php echo I18n::isRtl() ? '.rtl' : ''; ?>-5.3.3.css" />
+		<link type="text/css" rel="stylesheet" href="css/bootstrap5/bootstrap<?php echo I18n::isRtl() ? '.rtl' : ''; ?>-5.3.8.css" />
 		<link type="text/css" rel="stylesheet" href="css/bootstrap5/privatebin.css?<?php echo rawurlencode($VERSION); ?>" />
 <?php
 if ($SYNTAXHIGHLIGHTING) :
@@ -25,38 +25,33 @@ if ($SYNTAXHIGHLIGHTING) :
 endif;
 ?>
 		<noscript><link type="text/css" rel="stylesheet" href="css/noscript.css" /></noscript>
+		<?php $this->_linkTag('js/zlib-1.3.2.js'); ?>
 		<?php $this->_scriptTag('js/jquery-3.7.1.js', 'defer'); ?>
 <?php
 if ($QRCODE) :
 ?>
-		<?php $this->_scriptTag('js/kjua-0.9.0.js', 'async'); ?>
-<?php
-endif;
-if ($ZEROBINCOMPATIBILITY) :
-?>
-		<?php $this->_scriptTag('js/base64-1.7.js', 'defer'); ?>
+		<?php $this->_scriptTag('js/kjua-0.10.0.js', 'defer'); ?>
 <?php
 endif;
 ?>
-		<?php $this->_scriptTag('js/zlib-1.3.1.js', 'defer'); ?>
-		<?php $this->_scriptTag('js/base-x-4.0.0.js', 'defer'); ?>
-		<?php $this->_scriptTag('js/rawinflate-0.3.js', 'defer'); ?>
-		<?php $this->_scriptTag('js/bootstrap-5.3.3.js', 'async'); ?>
+		<?php $this->_scriptTag('js/zlib.js', 'defer'); ?>
+		<?php $this->_scriptTag('js/base-x-5.0.1.js', 'defer'); ?>
+		<?php $this->_scriptTag('js/bootstrap-5.3.8.js', 'defer'); ?>
 		<?php $this->_scriptTag('js/dark-mode-switch.js', 'defer'); ?>
 <?php
 if ($SYNTAXHIGHLIGHTING) :
 ?>
-		<?php $this->_scriptTag('js/prettify.js', 'async'); ?>
+		<?php $this->_scriptTag('js/prettify.js', 'defer'); ?>
 <?php
 endif;
 if ($MARKDOWN) :
 ?>
-		<?php $this->_scriptTag('js/showdown-2.1.0.js', 'async'); ?>
+		<?php $this->_scriptTag('js/showdown-2.1.0.js', 'defer'); ?>
 <?php
 endif;
 ?>
-		<?php $this->_scriptTag('js/purify-3.2.5.js', 'defer'); ?>
-		<?php $this->_scriptTag('js/legacy.js', 'async'); ?>
+		<?php $this->_scriptTag('js/purify-3.4.1.js', 'defer'); ?>
+		<?php $this->_scriptTag('js/legacy.js', 'defer'); ?>
 		<?php $this->_scriptTag('js/privatebin.js', 'defer'); ?>
 		<!-- icon -->
 		<link rel="apple-touch-icon" href="<?php echo I18n::encode($BASEPATH); ?>img/apple-touch-icon.png" sizes="180x180" />
@@ -87,8 +82,13 @@ endif;
 					<div class="modal-body">
 						<form id="passwordform" role="form">
 							<div class="mb-3">
-								<label for="passworddecrypt"><svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#eye" /></svg> <?php echo I18n::_('Please enter the password for this paste:') ?></label>
-								<input id="passworddecrypt" type="password" class="form-control" placeholder="<?php echo I18n::_('Enter password') ?>" required="required" />
+								<label for="passworddecrypt"><svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#eye" /></svg> <?php echo I18n::_('Please enter the password for this document:') ?></label>
+								<div class="input-group">
+									<input id="passworddecrypt" type="password" class="form-control input-password" placeholder="<?php echo I18n::_('Enter password') ?>" required="required" />
+									<button class="btn btn-outline-secondary toggle-password" type="button" title="<?php echo I18n::_('Show password'); ?>" aria-label="<?php echo I18n::_('Show password'); ?>">
+										<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#eye" /></svg>
+									</button>
+								</div>
 							</div>
 							<button type="submit" class="btn btn-success btn-block"><svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#power" /></svg> <?php echo I18n::_('Decrypt') ?></button>
 						</form>
@@ -180,7 +180,7 @@ endif;
 								<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#filetype-txt" /></svg> <?php echo I18n::_('Raw text'), PHP_EOL; ?>
 							</button>
 							<button id="downloadtextbutton" type="button" class="hidden btn btn-secondary flex-fill d-flex justify-content-center align-items-center gap-1">
-								<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#download" /></svg> <?php echo I18n::_('Save paste'), PHP_EOL; ?>
+								<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#download" /></svg> <?php echo I18n::_('Save document'), PHP_EOL; ?>
 							</button>
 <?php
 if ($EMAIL) :
@@ -207,7 +207,7 @@ endif;
 foreach ($EXPIRE as $key => $value) :
 ?>
 								<option value="<?php echo $key; ?>"<?php
-    if ($key == $EXPIREDEFAULT) :
+    if ($key === $EXPIREDEFAULT) :
 ?> selected="selected"<?php
     endif;
 ?>><?php echo $value; ?></option>
@@ -249,7 +249,12 @@ if ($PASSWORD) :
 ?>
 						<li class="nav-item">
 							<div id="password" class="navbar-form hidden">
-								<input type="password" id="passwordinput" placeholder="<?php echo I18n::_('Password (recommended)'); ?>" aria-label="<?php echo I18n::_('Password (recommended)'); ?>" class="form-control" size="23" />
+								<div class="input-group">
+									<input type="password" id="passwordinput" placeholder="<?php echo I18n::_('Password (recommended)'); ?>" aria-label="<?php echo I18n::_('Password (recommended)'); ?>" class="form-control input-password" size="23" />
+									<button class="btn btn-outline-secondary toggle-password" type="button" title="<?php echo I18n::_('Show password'); ?>" aria-label="<?php echo I18n::_('Show password'); ?>">
+										<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#eye" /></svg>
+									</button>
+								</div>
 							</div>
 						</li>
 <?php
@@ -283,7 +288,7 @@ endif;
     foreach ($FORMATTER as $key => $value) :
 ?>
 								<option value="<?php echo $key; ?>"<?php
-        if ($key == $FORMATTERDEFAULT) :
+        if ($key === $FORMATTERDEFAULT) :
 ?> selected="selected"<?php
         endif;
 ?>><?php echo $value; ?></option>
@@ -374,18 +379,21 @@ if ($FILEUPLOAD) :
 <?php
 endif;
 ?>
-				<div id="status" role="alert" class="d-flex justify-content-between align-items-center alert alert-<?php echo (bool)$ISDELETED ? 'success' : 'info'; echo empty($STATUS) ? ' hidden' : '' ?>">
+				<div id="status" role="alert" class="d-flex align-items-center gap-2 alert alert-<?php echo $ISDELETED ? 'success' : 'info'; echo empty($STATUS) ? ' hidden' : '' ?>">
 					<div>
 						<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#info-circle" /></svg>
 						<?php echo I18n::encode($STATUS), PHP_EOL; ?>
 					</div>
-					<?php
-						if ((bool)$ISDELETED):
-					?>
-						<button type="button" class="btn btn-secondary d-flex justify-content-center align-items-center gap-1" id="new-from-alert">
-							<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#repeat" /></svg> <?php echo I18n::_('Start over'), PHP_EOL; ?>
-						</button>
-					<?php endif; ?>
+<?php
+if ($ISDELETED) :
+?>
+					<button type="button" class="btn btn-secondary d-flex justify-content-center align-items-center gap-1 ms-auto" id="new-from-alert">
+						<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#repeat" /></svg>
+						<?php echo I18n::_('Start over'), PHP_EOL; ?>
+					</button>
+<?php
+endif;
+?>
 				</div>
 				<div id="errormessage" role="alert" class="<?php echo empty($ERROR) ? 'hidden' : '' ?> alert alert-danger">
 					<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#exclamation-triangle" /></svg>
@@ -438,12 +446,20 @@ endif;
 if (!empty($URLSHORTENER)) :
 ?>
 					<p>
-						<button id="shortenbutton" data-shortener="<?php echo I18n::encode($URLSHORTENER); ?>" type="button" class="btn btn-primary btn-block d-flex justify-content-center align-items-center gap-1">
+						<button id="shortenbutton" data-shortener="<?php echo I18n::encode($URLSHORTENER); ?>"
+								<?php if ($SHORTENBYDEFAULT) : ?>
+								data-autoshorten="true"
+								<?php endif; ?>
+								type="button" class="btn btn-primary btn-block d-flex justify-content-center align-items-center gap-1"
+						>
 							<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#send" /></svg> <?php echo I18n::_('Shorten URL'), PHP_EOL; ?>
 						</button>
 					</p>
 					<div role="alert" class="alert alert-danger">
 						<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#exclamation-circle" /></svg>
+						<?php if ($SHORTENBYDEFAULT) : ?>
+							<?php echo I18n::_('URL shortener is enabled by default.'), PHP_EOL; ?>
+						<?php endif; ?>
 						<?php echo I18n::_('URL shortener may expose your decrypt key in URL.'), PHP_EOL; ?>
 					</div>
 <?php
@@ -462,18 +478,21 @@ endif;
 			</section>
 			<section class="container-fluid">
 				<article>
-					<div id="placeholder" class="col-md-12 hidden"><?php echo I18n::_('+++ no paste text +++'); ?></div>
+					<div id="placeholder" class="col-md-12 hidden"><?php echo I18n::_('+++ no document text +++'); ?></div>
 					<div id="attachmentPreview" class="col-md-12 text-center hidden"></div>
-					<h6 id="copyShortcutHint" class="col-md-12"><small id="copyShortcutHintText"></small></h6>
+					<h6 id="copyShortcutHint" class="col-md-12 nav justify-content-between align-items-center mb-2 hidden">
+						<small id="copyShortcutHintText" class="d-none d-md-inline">
+							<?php
+								echo I18n::_("To copy document press on the copy button or use the clipboard shortcut <kbd>%s</kbd>+<kbd>c</kbd>", I18n::getCopyHotkey())
+							?>
+						</small>
+						<button type="button" id="copyShortcutHintBtn" class="btn btn-secondary ms-auto"><?php echo I18n::_('Copy'); ?></button>
+					</h6>
 					<div id="prettymessage" class="card col-md-12 hidden">
-						<button type="button" id="prettyMessageCopyBtn" class="text-secondary opacity-05-1-hover">
-							<svg id="copyIcon" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#copy" /></svg>
-							<svg id="copySuccessIcon" class="text-success" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#check" /></svg>
-						</button>
 						<pre id="prettyprint" class="card-body col-md-12 prettyprint linenums:1"></pre>
 					</div>
 					<div id="plaintext" class="col-md-12 hidden"></div>
-					<p class="col-md-12"><textarea id="message" name="message" cols="80" rows="25" aria-label="<?php echo I18n::_('Paste text'); ?>" tabindex="1" class="form-control hidden"></textarea></p>
+					<p class="col-md-12"><textarea id="message" name="message" cols="80" rows="25" aria-label="<?php echo I18n::_('Document text'); ?>" tabindex="1" class="form-control hidden"></textarea></p>
 					<p class="col-md-12 form-check form-switch">
 						<input id="messagetab" type="checkbox" tabindex="3" class="form-check-input" checked="checked" />
 						<label for="messagetab" class="form-check-label">
@@ -499,10 +518,9 @@ endif;
 		<footer class="container-fluid mt-auto">
 			<div class="row">
 				<h5 class="col-md-5 col-xs-8"><?php echo I18n::_($NAME); ?> <small>- <?php echo I18n::_('Because ignorance is bliss'); ?></small></h5>
-				<p class="col-md-1 col-xs-4 text-center"><?php echo $VERSION; ?></p>
-				<p id="aboutbox" class="col-md-6 col-xs-12">
+				<p id="aboutbox" class="col-md-7 col-xs-12">
 					<?php echo sprintf(
-                        I18n::_('%s is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.',
+                        I18n::_('%s is a minimalist, open source online pastebin where the server has zero knowledge of stored data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.',
                             I18n::_($NAME),
                             '%s', '%s'
                         ),
@@ -534,7 +552,7 @@ endif;
 				</div>
 				<div id="attachmenttemplate" role="alert" class="hidden alert alert-info">
 					<svg width="16" height="16" fill="currentColor" aria-hidden="true"><use href="img/bootstrap-icons.svg#download" /></svg>
-					<a class="alert-link"><?php echo I18n::_('Download attachment'); ?></a>
+					<a class="alert-link"><?php echo I18n::_('Download attachment'); ?><span></span></a>
 				</div>
 			</div>
 		</div>

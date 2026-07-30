@@ -1,6 +1,6 @@
 {
 	"name" : "privatebin/privatebin",
-	"description" : "PrivateBin is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted in the browser using 256 bit AES in Galois Counter mode (GCM).",
+	"description" : "PrivateBin is a minimalist, open source online pastebin where the server has zero knowledge of stored data. Data is encrypted/decrypted in the browser using 256 bit AES in Galois Counter mode (GCM).",
 	"type" : "project",
 	"keywords" : [
 		"private",
@@ -25,9 +25,9 @@
 	},
 	"require" : {
 		"php": "^8.2",
-		"jdenticon/jdenticon": "1.0.2",
-		"mlocati/ip-lib": "1.20.0",
-		"symfony/polyfill-php80": "1.31.0",
+		"jdenticon/jdenticon": "2.0.0",
+		"mlocati/ip-lib": "1.22.0",
+		"symfony/polyfill-php80": "1.34.0",
 		"yzalis/identicon": "2.0.0"
 	},
 	"suggest" : {
@@ -43,6 +43,12 @@
 		}
 	},
 	"config" : {
+		"audit": {
+			"block-insecure": false,
+			"ignore": {
+				"CVE-2025-45769": "disputed on the basis that key lengths are expected to be set by an application, not by this library"
+			}
+		},
 		"autoloader-suffix" : "DontChange",
 		"optimize-autoloader": true,
 		"preferred-install": "dist",

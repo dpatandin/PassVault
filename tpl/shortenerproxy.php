@@ -4,7 +4,6 @@ use PrivateBin\I18n;
 <html lang="<?php echo I18n::getLanguage(); ?>"<?php echo I18n::isRtl() ? ' dir="rtl"' : ''; ?>>
 	<head>
 		<meta charset="utf-8" />
-		<meta http-equiv="Content-Security-Policy" content="<?php echo I18n::encode($CSPHEADER); ?>">
 		<meta name="robots" content="noindex" />
 		<meta name="google" content="notranslate">
 		<title><?php echo I18n::_($NAME); ?></title>
@@ -13,12 +12,16 @@ use PrivateBin\I18n;
 <?php
 if (empty($ERROR)) :
 ?>
-		<p><?php echo I18n::_('Your paste is <a id="pasteurl" href="%s">%s</a> <span id="copyhint">(Hit <kbd>Ctrl</kbd>+<kbd>c</kbd> to copy)</span>', $SHORTURL, $SHORTURL); ?></p>
+		<p>
+			<?php
+				echo I18n::_('Your document is <a id="pasteurl" href="%s">%s</a> <span id="copyhint">(Hit <kbd>%s</kbd>+<kbd>c</kbd> to copy)</span>', $SHORTURL, $SHORTURL, I18n::getCopyHotkey());
+			?>
+		</p>
 <?php
 else:
 ?>
 		<div id="errormessage">
-			<p><?php echo I18n::_('Could not create paste: %s', $ERROR); ?></p>
+			<p><?php echo I18n::_('Could not create document: %s', $ERROR); ?></p>
 		</div>
 <?php
 endif;

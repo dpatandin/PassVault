@@ -5,6 +5,8 @@
 * Simon Rupf - current developer and maintainer
 * rugk - security review, doc improvment, JS refactoring & various other stuff
 * R4SAS - python client, compression, blob URI to support larger attachments
+* Mikhail Romanov - UI improvements, theme switching, clipboard support, multi-file upload, bugfixes, code refactoring
+* Karthik Kasturi - shlink proxy and url shortening bugfixes
 
 ## Past contributions
 
@@ -33,9 +35,9 @@
 * Mounir Idrassi & J. Mozdzen - secure YOURLS integration
 * Felipe Nakandakari - enabled AWS SDK to use default credential provider chain in the S3 Storage backend
 * Aaron Sherber - cache control headers for API calls & use of `shortenviayourls` in query parameters
-* Mikhail Romanov - UI improvements, theme switching, clipboard support, multi-file upload, bugfixes, code refactoring
 
 ## Translations
+
 * Hexalyse - French
 * Kuba Niewiarowski - Polish
 * Gabbalo - German
@@ -68,3 +70,5 @@
 * Nicolas Le Gall - Japanese
 * lazerns - Arabic
 * Edward205 - Romanian
+* babiloof - Swedish
+* Ali Fani - Persian

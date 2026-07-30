@@ -12,11 +12,10 @@
 
 namespace PrivateBin\Persistence;
 
-use Exception;
 use IPLib\Factory;
 use IPLib\ParseStringFlag;
 use PrivateBin\Configuration;
-use PrivateBin\I18n;
+use PrivateBin\Exception\TranslatedException;
 
 /**
  * TrafficLimiter
@@ -74,7 +73,7 @@ class TrafficLimiter extends AbstractPersistence
         self::setExempted($conf->getKey('exempted', 'traffic'));
         self::setLimit($conf->getKey('limit', 'traffic'));
 
-        if (($option = $conf->getKey('header', 'traffic')) !== '') {
+        if (!empty($option = $conf->getKey('header', 'traffic'))) {
             $httpHeader = 'HTTP_' . $option;
             if (array_key_exists($httpHeader, $_SERVER) && !empty($_SERVER[$httpHeader])) {
                 self::$_ipKey = $httpHeader;
@@ -167,7 +166,7 @@ class TrafficLimiter extends AbstractPersistence
      *
      * @access public
      * @static
-     * @throws Exception
+     * @throws TranslatedException
      * @return true
      */
     public static function canPass()
@@ -181,7 +180,7 @@ class TrafficLimiter extends AbstractPersistence
                     return true;
                 }
             }
-            throw new Exception(I18n::_('Your IP is not authorized to create pastes.'));
+            throw new TranslatedException('Your IP is not authorized to create documents.');
         }
 
         // disable limits if set to less then 1
@@ -204,21 +203,15 @@ class TrafficLimiter extends AbstractPersistence
         $now  = time();
         $tl   = (int) self::$_store->getValue('traffic_limiter', $hash);
         self::$_store->purgeValues('traffic_limiter', $now - self::$_limit);
-        if ($tl > 0 && ($tl + self::$_limit >= $now)) {
-            $result = false;
-        } else {
-            $tl     = time();
-            $result = true;
-        }
-        if (!self::$_store->setValue((string) $tl, 'traffic_limiter', $hash)) {
-            error_log('failed to store the traffic limiter, it probably contains outdated information');
-        }
-        if ($result) {
+        if ($tl === 0 || ($tl + self::$_limit) < $now) {
+            if (!self::$_store->setValue((string) $now, 'traffic_limiter', $hash)) {
+                error_log('failed to store the traffic limiter, it probably contains outdated information');
+            }
             return true;
         }
-        throw new Exception(I18n::_(
+        throw new TranslatedException(array(
             'Please wait %d seconds between each post.',
-            self::$_limit
+            self::$_limit,
         ));
     }
 }

@@ -37,6 +37,7 @@ namespace PrivateBin\Data;
 
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
+use PrivateBin\Exception\JsonException;
 use PrivateBin\Json;
 
 class S3Storage extends AbstractData
@@ -81,33 +82,31 @@ class S3Storage extends AbstractData
      */
     public function __construct(array $options)
     {
-        if (is_array($options)) {
-            // AWS SDK will try to load credentials from environment if credentials are not passed via configuration
-            // ref: https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials.html#default-credential-chain
-            if (isset($options['accesskey']) && isset($options['secretkey'])) {
-                $this->_options['credentials'] = array();
+        // AWS SDK will try to load credentials from environment if credentials are not passed via configuration
+        // ref: https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_credentials.html#default-credential-chain
+        if (isset($options['accesskey']) && isset($options['secretkey'])) {
+            $this->_options['credentials'] = array();
 
-                $this->_options['credentials']['key']    = $options['accesskey'];
-                $this->_options['credentials']['secret'] = $options['secretkey'];
-            }
-            if (array_key_exists('region', $options)) {
-                $this->_options['region'] = $options['region'];
-            }
-            if (array_key_exists('version', $options)) {
-                $this->_options['version'] = $options['version'];
-            }
-            if (array_key_exists('endpoint', $options)) {
-                $this->_options['endpoint'] = $options['endpoint'];
-            }
-            if (array_key_exists('use_path_style_endpoint', $options)) {
-                $this->_options['use_path_style_endpoint'] = filter_var($options['use_path_style_endpoint'], FILTER_VALIDATE_BOOLEAN);
-            }
-            if (array_key_exists('bucket', $options)) {
-                $this->_bucket = $options['bucket'];
-            }
-            if (array_key_exists('prefix', $options)) {
-                $this->_prefix = $options['prefix'];
-            }
+            $this->_options['credentials']['key']    = $options['accesskey'];
+            $this->_options['credentials']['secret'] = $options['secretkey'];
+        }
+        if (array_key_exists('region', $options)) {
+            $this->_options['region'] = $options['region'];
+        }
+        if (array_key_exists('version', $options)) {
+            $this->_options['version'] = $options['version'];
+        }
+        if (array_key_exists('endpoint', $options)) {
+            $this->_options['endpoint'] = $options['endpoint'];
+        }
+        if (array_key_exists('use_path_style_endpoint', $options)) {
+            $this->_options['use_path_style_endpoint'] = filter_var($options['use_path_style_endpoint'], FILTER_VALIDATE_BOOLEAN);
+        }
+        if (array_key_exists('bucket', $options)) {
+            $this->_bucket = $options['bucket'];
+        }
+        if (array_key_exists('prefix', $options)) {
+            $this->_prefix = $options['prefix'];
         }
 
         $this->_client = new S3Client($this->_options);
@@ -149,7 +148,7 @@ class S3Storage extends AbstractData
      */
     private function _getKey($pasteid)
     {
-        if ($this->_prefix != '') {
+        if (!empty($this->_prefix)) {
             return $this->_prefix . '/' . $pasteid;
         }
         return $pasteid;
@@ -158,8 +157,7 @@ class S3Storage extends AbstractData
     /**
      * Uploads the payload in the $this->_bucket under the specified key.
      * The entire payload is stored as a JSON document. The metadata is replicated
-     * as the S3 object's metadata except for the fields attachment, attachmentname
-     * and salt.
+     * as the S3 object's metadata except for the field salt.
      *
      * @param $key string to store the payload under
      * @param $payload array to store
@@ -167,8 +165,8 @@ class S3Storage extends AbstractData
      */
     private function _upload($key, &$payload)
     {
-        $metadata = array_key_exists('meta', $payload) ? $payload['meta'] : array();
-        unset($metadata['attachment'], $metadata['attachmentname'], $metadata['salt']);
+        $metadata = $payload['meta'] ?? array();
+        unset($metadata['salt']);
         foreach ($metadata as $k => $v) {
             $metadata[$k] = strval($v);
         }
@@ -180,12 +178,14 @@ class S3Storage extends AbstractData
                 'ContentType' => 'application/json',
                 'Metadata'    => $metadata,
             ));
+            return true;
         } catch (S3Exception $e) {
             error_log('failed to upload ' . $key . ' to ' . $this->_bucket . ', ' .
                 trim(preg_replace('/\s\s+/', ' ', $e->getMessage())));
-            return false;
+        } catch (JsonException $e) {
+            error_log('failed to JSON encode ' . $key . ', ' . $e->getMessage());
         }
-        return true;
+        return false;
     }
 
     /**
@@ -215,8 +215,10 @@ class S3Storage extends AbstractData
         } catch (S3Exception $e) {
             error_log('failed to read ' . $pasteid . ' from ' . $this->_bucket . ', ' .
                 trim(preg_replace('/\s\s+/', ' ', $e->getMessage())));
-            return false;
+        } catch (JsonException $e) {
+            error_log('failed to JSON decode ' . $pasteid . ', ' . $e->getMessage());
         }
+        return false;
     }
 
     /**
@@ -286,7 +288,8 @@ class S3Storage extends AbstractData
                     'Bucket' => $this->_bucket,
                     'Key'    => $entry['Key'],
                 ));
-                $body             = JSON::decode($object['Body']->getContents());
+                $data             = $object['Body']->getContents();
+                $body             = JSON::decode($data);
                 $items            = explode('/', $entry['Key']);
                 $body['id']       = $items[3];
                 $body['parentid'] = $items[2];
@@ -314,7 +317,7 @@ class S3Storage extends AbstractData
     public function purgeValues($namespace, $time)
     {
         $path = $this->_prefix;
-        if ($path != '') {
+        if (!empty($path)) {
             $path .= '/';
         }
         $path .= 'config/' . $namespace;
@@ -329,17 +332,15 @@ class S3Storage extends AbstractData
                     'Bucket' => $this->_bucket,
                     'Key'    => $name,
                 ));
-                if ($head->get('Metadata') != null && array_key_exists('value', $head->get('Metadata'))) {
-                    $value = $head->get('Metadata')['value'];
-                    if (is_numeric($value) && intval($value) < $time) {
-                        try {
-                            $this->_client->deleteObject(array(
-                                'Bucket' => $this->_bucket,
-                                'Key'    => $name,
-                            ));
-                        } catch (S3Exception $e) {
-                            // deleted by another instance.
-                        }
+                $value = $head->get('Metadata')['value'] ?? '';
+                if (is_numeric($value) && intval($value) < $time) {
+                    try {
+                        $this->_client->deleteObject(array(
+                            'Bucket' => $this->_bucket,
+                            'Key'    => $name,
+                        ));
+                    } catch (S3Exception $e) {
+                        // deleted by another instance.
                     }
                 }
             }
@@ -356,7 +357,7 @@ class S3Storage extends AbstractData
     public function setValue($value, $namespace, $key = '')
     {
         $prefix = $this->_prefix;
-        if ($prefix != '') {
+        if (!empty($prefix)) {
             $prefix .= '/';
         }
 
@@ -367,7 +368,7 @@ class S3Storage extends AbstractData
         }
 
         $metadata = array('namespace' => $namespace);
-        if ($namespace != 'salt') {
+        if ($namespace !== 'salt') {
             $metadata['value'] = strval($value);
         }
         try {
@@ -392,7 +393,7 @@ class S3Storage extends AbstractData
     public function getValue($namespace, $key = '')
     {
         $prefix = $this->_prefix;
-        if ($prefix != '') {
+        if (!empty($prefix)) {
             $prefix .= '/';
         }
 
@@ -421,7 +422,7 @@ class S3Storage extends AbstractData
         $expired = array();
         $now     = time();
         $prefix  = $this->_prefix;
-        if ($prefix != '') {
+        if (!empty($prefix)) {
             $prefix .= '/';
         }
 
@@ -431,11 +432,9 @@ class S3Storage extends AbstractData
                     'Bucket' => $this->_bucket,
                     'Key'    => $object['Key'],
                 ));
-                if ($head->get('Metadata') != null && array_key_exists('expire_date', $head->get('Metadata'))) {
-                    $expire_at = intval($head->get('Metadata')['expire_date']);
-                    if ($expire_at != 0 && $expire_at < $now) {
-                        array_push($expired, $object['Key']);
-                    }
+                $expire_at = $head->get('Metadata')['expire_date'] ?? '';
+                if (is_numeric($expire_at) && intval($expire_at) < $now) {
+                    array_push($expired, $object['Key']);
                 }
 
                 if (count($expired) > $batchsize) {
@@ -455,7 +454,7 @@ class S3Storage extends AbstractData
     {
         $pastes = array();
         $prefix = $this->_prefix;
-        if ($prefix != '') {
+        if (!empty($prefix)) {
             $prefix .= '/';
         }
 

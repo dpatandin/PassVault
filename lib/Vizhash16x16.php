@@ -93,6 +93,9 @@ class Vizhash16x16
 
         // Then use these integers to drive the creation of an image.
         $image = imagecreatetruecolor($this->width, $this->height);
+        if ($image === false) {
+            return '';
+        }
 
         $r = $r0 = $this->getInt();
         $g = $g0 = $this->getInt();
@@ -100,7 +103,7 @@ class Vizhash16x16
 
         // First, create an image with a specific gradient background.
         $op = 'v';
-        if (($this->getInt() % 2) == 0) {
+        if (($this->getInt() % 2) === 0) {
             $op = 'h';
         }
         $image = $this->degrade($image, $op, array($r0, $g0, $b0), array(0, 0, 0));
@@ -168,15 +171,15 @@ class Vizhash16x16
      * @link   https://www.supportduweb.com/scripts_tutoriaux-code-source-41-gd-faire-un-degrade-en-php-gd-fonction-degrade-imagerie.html
      *
      * @access private
-     * @param  resource $img
+     * @param  resource|\GdImage $img
      * @param  string $direction
      * @param  array $color1
      * @param  array $color2
-     * @return resource
+     * @return resource|\GdImage
      */
     private function degrade($img, $direction, $color1, $color2)
     {
-        if ($direction == 'h') {
+        if ($direction === 'h') {
             $size    = imagesx($img);
             $sizeinv = imagesy($img);
         } else {
@@ -192,7 +195,7 @@ class Vizhash16x16
             $r = $color1[0] + ((int) $diffs[0] * $i);
             $g = $color1[1] + ((int) $diffs[1] * $i);
             $b = $color1[2] + ((int) $diffs[2] * $i);
-            if ($direction == 'h') {
+            if ($direction === 'h') {
                 imageline($img, $i, 0, $i, $sizeinv, imagecolorallocate($img, $r, $g, $b));
             } else {
                 imageline($img, 0, $i, $sizeinv, $i, imagecolorallocate($img, $r, $g, $b));
@@ -205,7 +208,7 @@ class Vizhash16x16
      * Draw a shape
      *
      * @access private
-     * @param  resource $image
+     * @param  resource|\GdImage $image
      * @param  int $action
      * @param  int $color
      */

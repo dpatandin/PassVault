@@ -55,12 +55,43 @@
          * blacklist of UserAgents (parts) known to belong to a bot
          *
          * @private
-         * @enum   {Array}
+         * @type {string[]}
          * @readonly
          */
         var badBotUA = [
+            // Generic bot identifiers
+            'bot',
             'Bot',
-            'bot'
+            'crawler',
+            'Crawler',
+            'spider',
+            'Spider',
+            'scraper',
+            'Scraper',
+            
+            // Search Engines
+            'Mediapartners-Google',
+            'BingPreview',
+            'Yahoo! Slurp',
+            
+            // SEO & Analytics
+            'Screaming Frog',
+            
+            // Social Media
+            'facebookexternalhit',
+            
+            // AI & LLM
+            'ChatGPT-User',
+            'anthropic-ai',
+            
+            // Security Scanners
+            'CensysInspect',
+            'Shodan',
+            
+            // Other Common Crawlers
+            '80legs',
+            'ia_archiver',
+            'Teoma',
         ];
 
         /**
@@ -106,8 +137,8 @@
                 return window.isSecureContext;
             }
 
-            // HTTP is obviously insecure
-            if (window.location.protocol !== 'http:') {
+            // HTTPS is considered secure
+            if (window.location.protocol === 'https:') {
                 return true;
             }
 
@@ -246,7 +277,12 @@
          */
         me.init = function()
         {
-            // prevent bots from viewing a paste and potentially deleting data
+            // prevent early init
+            if (typeof document === 'undefined' || typeof navigator === 'undefined' || typeof window === 'undefined') {
+                return;
+            }
+
+            // prevent bots from viewing a document and potentially deleting data
             // when burn-after-reading is set
             if (isBadBot()) {
                 showError('I love you too, bot…');
