@@ -4,15 +4,15 @@ $isCpct = substr($template, 9, 8) === '-compact';
 $isDark = substr($template, 9, 5) === '-dark';
 $isPage = substr($template, -5) === '-page';
 ?><!DOCTYPE html>
-<html lang="en"<?php echo I18n::isRtl() ? ' dir="rtl"' : ''; ?>>
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="Content-Security-Policy" content="<?php echo I18n::encode($CSPHEADER); ?>">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="robots" content="noindex" />
-        <meta name="google" content="notranslate">
-        <title><?php echo I18n::_($NAME); ?></title>
+<html lang="<?php echo I18n::getLanguage(); ?>"<?php echo I18n::isRtl() ? ' dir="rtl"' : ''; ?>>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="Content-Security-Policy" content="<?php echo I18n::encode($CSPHEADER); ?>">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="robots" content="noindex" />
+		<meta name="google" content="notranslate">
+		<title><?php echo I18n::_($NAME); ?></title>
 <?php
 if (!$isDark) :
 ?>
@@ -42,37 +42,32 @@ if ($SYNTAXHIGHLIGHTING) :
 endif;
 ?>
 		<noscript><link type="text/css" rel="stylesheet" href="css/noscript.css" /></noscript>
+		<?php $this->_linkTag('js/zlib-1.3.2.js'); ?>
 		<?php $this->_scriptTag('js/jquery-3.7.1.js', 'defer'); ?>
 <?php
 if ($QRCODE) :
 ?>
-		<?php $this->_scriptTag('js/kjua-0.9.0.js', 'async'); ?>
-<?php
-endif;
-if ($ZEROBINCOMPATIBILITY) :
-?>
-		<?php $this->_scriptTag('js/base64-1.7.js', 'async'); ?>
+		<?php $this->_scriptTag('js/kjua-0.10.0.js', 'defer'); ?>
 <?php
 endif;
 ?>
-		<?php $this->_scriptTag('js/zlib-1.3.1.js', 'async'); ?>
-		<?php $this->_scriptTag('js/base-x-4.0.0.js', 'defer'); ?>
-		<?php $this->_scriptTag('js/rawinflate-0.3.js', 'defer'); ?>
+		<?php $this->_scriptTag('js/zlib.js', 'defer'); ?>
+		<?php $this->_scriptTag('js/base-x-5.0.1.js', 'defer'); ?>
 		<?php $this->_scriptTag('js/bootstrap-3.4.1.js', 'defer'); ?>
 <?php
 if ($SYNTAXHIGHLIGHTING) :
 ?>
-		<?php $this->_scriptTag('js/prettify.js', 'async'); ?>
+		<?php $this->_scriptTag('js/prettify.js', 'defer'); ?>
 <?php
 endif;
 if ($MARKDOWN) :
 ?>
-		<?php $this->_scriptTag('js/showdown-2.1.0.js', 'async'); ?>
+		<?php $this->_scriptTag('js/showdown-2.1.0.js', 'defer'); ?>
 <?php
 endif;
 ?>
-		<?php $this->_scriptTag('js/purify-3.2.5.js', 'async'); ?>
-		<?php $this->_scriptTag('js/legacy.js', 'async'); ?>
+		<?php $this->_scriptTag('js/purify-3.4.1.js', 'defer'); ?>
+		<?php $this->_scriptTag('js/legacy.js', 'defer'); ?>
 		<?php $this->_scriptTag('js/privatebin.js', 'defer'); ?>
 		<!-- icon -->
 		<link rel="apple-touch-icon" href="<?php echo I18n::encode($BASEPATH); ?>img/apple-touch-icon.png" sizes="180x180" />
@@ -114,8 +109,13 @@ if (count($class)) {
 					<div class="modal-body">
 						<form id="passwordform" role="form">
 							<div class="form-group">
-								<label for="passworddecrypt"><span class="glyphicon glyphicon-eye-open"></span> <?php echo I18n::_('Please enter the password for this paste:') ?></label>
-								<input id="passworddecrypt" type="password" class="form-control" placeholder="<?php echo I18n::_('Enter password') ?>" required="required">
+								<label for="passworddecrypt"><span class="glyphicon glyphicon-eye-open"></span> <?php echo I18n::_('Please enter the password for this document:') ?></label>
+								<div class="input-group">
+									<input id="passworddecrypt" type="password" class="form-control input-password" placeholder="<?php echo I18n::_('Enter password') ?>" required="required">
+									<div class="input-group-addon toggle-password" type="button" title="<?php echo I18n::_('Show password'); ?>" aria-label="<?php echo I18n::_('Show password'); ?>">
+										<span class="glyphicon glyphicon-eye-open"></span>
+									</div>
+								</div>
 							</div>
 							<button type="submit" class="btn btn-success btn-block"><span class="glyphicon glyphicon-off"></span> <?php echo I18n::_('Decrypt') ?></button>
 						</form>
@@ -224,7 +224,7 @@ endif;
 							<span class="glyphicon glyphicon-text-background" aria-hidden="true"></span> <?php echo I18n::_('Raw text'), PHP_EOL; ?>
 						</button>
 						<button id="downloadtextbutton" type="button" class="hidden btn btn-<?php echo $isDark ? 'warning' : 'default'; ?> navbar-btn">
-							<span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span> <?php echo I18n::_('Save paste'), PHP_EOL; ?>
+							<span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span> <?php echo I18n::_('Save document'), PHP_EOL; ?>
 						</button>
 <?php
 if ($EMAIL) :
@@ -250,7 +250,7 @@ endif;
 foreach ($EXPIRE as $key => $value) :
 ?>
 							<option value="<?php echo $key; ?>"<?php
-    if ($key == $EXPIREDEFAULT) :
+    if ($key === $EXPIREDEFAULT) :
 ?> selected="selected"<?php
     endif;
 ?>><?php echo $value; ?></option>
@@ -328,7 +328,7 @@ if ($isCpct) :
     foreach ($FORMATTER as $key => $value) :
 ?>
 							<option value="<?php echo $key; ?>"<?php
-        if ($key == $FORMATTERDEFAULT) :
+        if ($key === $FORMATTERDEFAULT) :
 ?> selected="selected"<?php
         endif;
 ?>><?php echo $value; ?></option>
@@ -374,7 +374,12 @@ if ($PASSWORD) :
 ?>
 					<li>
 						<div id="password" class="navbar-form hidden">
-							<input type="password" id="passwordinput" placeholder="<?php echo I18n::_('Password (recommended)'); ?>" class="form-control" size="23" />
+							<div class="input-group">
+								<input type="password" id="passwordinput" placeholder="<?php echo I18n::_('Password (recommended)'); ?>" class="form-control input-password" size="23" />
+								<div class="input-group-addon toggle-password" type="button" title="<?php echo I18n::_('Show password'); ?>" aria-label="<?php echo I18n::_('Show password'); ?>">
+									<span class="glyphicon glyphicon-eye-open"></span>
+								</div>
+							</div>
 						</div>
 					</li>
 <?php
@@ -408,7 +413,7 @@ if (!$isCpct) :
     foreach ($FORMATTER as $key => $value) :
 ?>
 							<option value="<?php echo $key; ?>"<?php
-        if ($key == $FORMATTERDEFAULT) :
+        if ($key === $FORMATTERDEFAULT) :
 ?> selected="selected"<?php
         endif;
 ?>><?php echo $value; ?></option>
@@ -509,16 +514,19 @@ if ($FILEUPLOAD) :
 <?php
 endif;
 ?>
-				<div id="status" role="alert" class="clearfix alert alert-<?php echo (bool)$ISDELETED ? 'success' : 'info'; echo empty($STATUS) ? ' hidden' : '' ?>">
+				<div id="status" role="alert" class="clearfix alert alert-<?php echo $ISDELETED ? 'success' : 'info'; echo empty($STATUS) ? ' hidden' : '' ?>">
 					<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
 					<?php echo I18n::encode($STATUS), PHP_EOL; ?>
-					<?php
-						if ((bool)$ISDELETED):
-					?>
-						<button type="button" class="btn btn-default pull-right" id="new-from-alert">
-							<span class="glyphicon glyphicon-repeat"></span> <?php echo I18n::_('Start over'), PHP_EOL; ?>
-						</button>
-					<?php endif; ?>
+<?php
+if ($ISDELETED) :
+?>
+					<button type="button" class="btn btn-default pull-right" id="new-from-alert">
+						<span class="glyphicon glyphicon-repeat"></span>
+						<?php echo I18n::_('Start over'), PHP_EOL; ?>
+					</button>
+<?php
+endif;
+?>
 				</div>
 				<div id="errormessage" role="alert" class="<?php echo empty($ERROR) ? 'hidden' : '' ?> alert alert-danger">
 					<span class="glyphicon glyphicon-alert" aria-hidden="true"></span>
@@ -536,7 +544,7 @@ endif;
 					<a href="https://www.mozilla.org/firefox/">Firefox</a>,
 					<a href="https://www.opera.com/">Opera</a>,
 					<a href="https://www.google.com/chrome">Chrome</a>…<br />
-					<span class="small"><?php echo I18n::_(''); ?></span>
+					<span class="small"><?php echo I18n::_('For more information <a href="%s">see this FAQ entry</a>.', 'https://github.com/PrivateBin/PrivateBin/wiki/FAQ#why-does-it-show-me-the-error-privatebin-requires-a-modern-browser-to-work'); ?></span>
 				</div>
 <?php
 if ($HTTPWARNING) :
@@ -571,12 +579,20 @@ endif;
 if (!empty($URLSHORTENER)) :
 ?>
 					<p>
-						<button id="shortenbutton" data-shortener="<?php echo I18n::encode($URLSHORTENER); ?>" type="button" class="btn btn-<?php echo $isDark ? 'warning' : 'primary'; ?> btn-block">
+						<button id="shortenbutton" data-shortener="<?php echo I18n::encode($URLSHORTENER); ?>"
+								<?php if ($SHORTENBYDEFAULT) : ?>
+								data-autoshorten="true"
+								<?php endif; ?>
+								type="button" class="btn btn-<?php echo $isDark ? 'warning' : 'primary'; ?> btn-block"
+						>
 							<span class="glyphicon glyphicon-send" aria-hidden="true"></span> <?php echo I18n::_('Shorten URL'), PHP_EOL; ?>
 						</button>
 					</p>
 					<div role="alert" class="alert alert-danger">
 						<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+						<?php if ($SHORTENBYDEFAULT) : ?>
+							<?php echo I18n::_('URL shortener is enabled by default.'), PHP_EOL; ?>
+						<?php endif; ?>
 						<?php echo I18n::_('URL shortener may expose your decrypt key in URL.'), PHP_EOL; ?>
 					</div>
 <?php
@@ -604,14 +620,21 @@ endif;
 			</section>
 			<section class="container">
 				<article class="row">
-					<div id="placeholder" class="col-md-12 hidden"><?php echo I18n::_('+++ no paste text +++'); ?></div>
+					<div id="placeholder" class="col-md-12 hidden"><?php echo I18n::_('+++ no document text +++'); ?></div>
 					<div id="attachmentPreview" class="col-md-12 text-center hidden"></div>
-					<h5 id="copyShortcutHint" class="col-md-12"><small id="copyShortcutHintText"></small></h5>
+					<h5 id="copyShortcutHint" class="media col-md-12 hidden" style="margin-top: 0;">
+						<div class="media-body media-middle">
+							<small id="copyShortcutHintText" class="hidden-xs">
+								<?php
+									echo I18n::_("To copy document press on the copy button or use the clipboard shortcut <kbd>%s</kbd>+<kbd>c</kbd>", I18n::getCopyHotkey())
+								?>
+							</small>
+						</div>
+						<div class="media-right media-middle">
+							<button type="button" id="copyShortcutHintBtn" class="btn btn-default"><?php echo I18n::_('Copy'); ?></button>
+						</div>
+					</h5>
 					<div id="prettymessage" class="col-md-12 hidden">
-						<button id="prettyMessageCopyBtn">
-							<span id="copyIcon" class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>
-							<span id="copySuccessIcon" class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-						</button>
 						<pre id="prettyprint" class="col-md-12 prettyprint linenums:1"></pre>
 					</div>
 					<div id="plaintext" class="col-md-12 hidden"></div>
@@ -639,15 +662,16 @@ endif;
 			</section>
 			<footer class="container">
 				<div class="row">
-					<h4 class="col-md-5 col-xs-8"><small><?php echo I18n::_(''); ?></small></h4>
-					<p id="aboutbox" class="col-md-7 col-xs-12">
+					<h4 class="col-md-5 col-xs-8"><?php echo I18n::_($NAME); ?> <small>- <?php echo I18n::_('Because ignorance is bliss'); ?></small></h4>
+					<p class="col-md-1 col-xs-4 text-center"><?php echo $VERSION; ?></p>
+					<p id="aboutbox" class="col-md-6 col-xs-12">
 						<?php echo sprintf(
-					        I18n::_('%s is based on PrivateBin and is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted in the browser using 256 bits AES.',
-					            I18n::_($NAME),
-					            '%s', '%s'
-					        ),
-					        '<i>', '</i>'
-					    ); ?>
+                            I18n::_('%s is a minimalist, open source online pastebin where the server has zero knowledge of stored data. Data is encrypted/decrypted %sin the browser%s using 256 bits AES.',
+                                I18n::_($NAME),
+                                '%s', '%s'
+                            ),
+                            '<i>', '</i>'), ' ', $INFO, PHP_EOL;
+                        ?>
 					</p>
 				</div>
 			</footer>
@@ -675,7 +699,7 @@ endif;
 				</div>
 				<div id="attachmenttemplate" role="alert" class="attachment hidden alert alert-info">
 					<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-					<a class="alert-link"><?php echo I18n::_('Download attachment'); ?></a>
+					<a class="alert-link"><?php echo I18n::_('Download attachment'); ?><span></span></a>
 				</div>
 			</div>
 		</div>

@@ -49,13 +49,66 @@ class View
      */
     public function draw($template)
     {
+        $dir  = PATH . 'tpl' . DIRECTORY_SEPARATOR;
         $file = substr($template, 0, 10) === 'bootstrap-' ? 'bootstrap' : $template;
-        $path = PATH . 'tpl' . DIRECTORY_SEPARATOR . $file . '.php';
-        if (!file_exists($path)) {
-            throw new Exception('Template ' . $template . ' not found!', 80);
+        $path = $dir . $file . '.php';
+        if (!is_file($path)) {
+            throw new Exception('Template ' . $template . ' not found in file ' . $path . '!', 80);
+        }
+        if (!in_array($path, glob($dir . '*.php', GLOB_NOSORT | GLOB_ERR), true)) {
+            throw new Exception('Template ' . $file . '.php not found in ' . $dir . '!', 81);
         }
         extract($this->_variables);
         include $path;
+    }
+
+    /**
+     * get cache buster query string
+     *
+     * if the file isn't versioned (ends in a digit), adds our own version as a query string
+     *
+     * @access private
+     * @param  string $file
+     */
+    private function _getCacheBuster($file)
+    {
+        if ((bool) preg_match('#[0-9]\.m?js$#', (string) $file)) {
+            return '';
+        }
+        // PassVault: bust caches by file mtime for non-versioned assets (e.g.
+        // privatebin.js) so edits reload in browsers even when VERSION is
+        // unchanged. Falls back to VERSION if the file can't be stat'd.
+        $absoluteFile = PATH . $file;
+        if (is_file($absoluteFile)) {
+            return '?v=' . rawurlencode((string) filemtime($absoluteFile));
+        }
+        return '?' . rawurlencode($this->_variables['VERSION']);
+    }
+
+    /**
+     * get SRI hash for given file
+     *
+     * @access private
+     * @param  string $file
+     */
+    private function _getSri($file)
+    {
+        if (array_key_exists($file, $this->_variables['SRI'])) {
+            return ' integrity="' . $this->_variables['SRI'][$file] . '"';
+        }
+        return '';
+    }
+
+    /**
+     * echo module preload link tag incl. SRI hash for given script file
+     *
+     * @access private
+     * @param  string $file
+     */
+    private function _linkTag($file)
+    {
+        echo '<link rel="modulepreload" href="', $file,
+        $this->_getCacheBuster($file), '"', $this->_getSri($file), ' />', PHP_EOL;
     }
 
     /**
@@ -67,22 +120,9 @@ class View
      */
     private function _scriptTag($file, $attributes = '')
     {
-        $sri = array_key_exists($file, $this->_variables['SRI']) ?
-            ' integrity="' . $this->_variables['SRI'][$file] . '"' : '';
-        $cacheBuster = '';
-        $absoluteFile = PATH . $file;
-
-        // if the file isn't versioned (ends in a digit), add a cache-busting query string
-        if ((bool) preg_match('#[0-9]\.js$#', (string) $file)) {
-            $cacheBuster = '';
-        } else {
-            $cacheBuster = is_file($absoluteFile) ?
-                '?v=' . rawurlencode((string) filemtime($absoluteFile)) :
-                '?' . rawurlencode($this->_variables['VERSION']);
-        }
-
         echo '<script ', $attributes,
         ' type="text/javascript" data-cfasync="false" src="', $file,
-        $cacheBuster, '"', $sri, ' crossorigin="anonymous"></script>', PHP_EOL;
+        $this->_getCacheBuster($file), '"', $this->_getSri($file),
+        ' crossorigin="anonymous"></script>', PHP_EOL;
     }
 }

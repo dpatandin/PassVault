@@ -1,13 +1,90 @@
 # PrivateBin version history
 
-## 1.7.7 (not yet released)
-* ADDED: Switching templates using the web ui (#1501)
+## 2.0.5 (2026-07-11)
+* CHANGED: Show OS-specific copy hotkey hint (Cmd+c on Mac, Ctrl+c on others) (#1506)
+* FIXED: Prevent browsers from rendering unsafe attachments like HTML in a new tab
+* FIXED: State corruption after "Remove attachment" (#1824)
+* FIXED: Copy button is hidden if the document is made as markdown (#1703)
+* FIXED: Shortened URLs from YOURLS received but failed to parse (#1844)
+* FIXED: Insert only base path in JSON API responses, without GET parameters
+
+## 2.0.4 (2026-05-03)
+* ADDED: Translations for Swedish & Persian
+* CHANGED: Deduplicate JSON error message translations
+* CHANGED: Refactored translation of exception messages
+* CHANGED: Upgrading libraries to: DOMpurify 3.4.1, ip-lib 1.22.0, polyfill-php80 1.34.0 & zlib 1.3.2
+* CHANGED: Remove obsolete X-XSS-Protection header (#1825)
+* FIXED: Some exceptions not getting translated
+* FIXED: Attachment disappears after a "paste" in the message area (#1731)
+* FIXED: The content format is not reset when creating a new document (#1707)
+
+## 1.7.9 (2025-11-13)
+* CHANGED: Upgrading libraries to: base-x 5.0.1, bootstrap 5.3.8, DOMpurify 3.2.7, ip-lib 1.21.0 & kjua 0.10.0
+* CHANGED: Refactored jQuery DOM element creation into plain JavaScript
+* FIXED: Prevent arbitrary PHP file inclusion when enabling template switching ([CVE-2025-64714](https://privatebin.info/reports/vulnerability-2025-11-12-templates.html))
+* FIXED: Malicious filename can be used for self-XSS / HTML injection locally for users ([CVE-2025-64711](https://privatebin.info/reports/vulnerability-2025-11-12-drag-drop.html))
+* FIXED: Sanitize file name in attachment size hint ([CVE-2025-62796](https://privatebin.info/reports/vulnerability-2025-10-28.html))
+* FIXED: Unable to create a new paste from the cloned one when a JSON file attached (#1585)
+* FIXED: traffic limiter not working when using Filesystem storage and PHP opcache
+* FIXED: Configuration combinations test errors
+
+## 2.0.3 (2025-11-12)
+* FIXED: Prevent arbitrary PHP file inclusion when enabling template switching ([CVE-2025-64714](https://privatebin.info/reports/vulnerability-2025-11-12-templates.html))
+* FIXED: Malicious filename can be used for self-XSS / HTML injection locally for users ([CVE-2025-64711](https://privatebin.info/reports/vulnerability-2025-11-12-drag-drop.html))
+* FIXED: Unable to create a new paste from the cloned one when a JSON file attached (#1585)
+
+## 2.0.2 (2025-10-28)
+* CHANGED: Upgrading libraries to: DOMpurify 3.3.0
+* CHANGED: Refactored jQuery DOM element creation into plain JavaScript
+* FIXED: Sanitize file name in attachment size hint ([CVE-2025-62796](https://privatebin.info/reports/vulnerability-2025-10-28.html))
+* FIXED: PHP OPcache module is optional again (#1679)
+* FIXED: bootstrap template password peek input group display
+
+## 2.0.1 (2025-10-12)
+* ADDED: Auto shorten URLs with config option `shortenbydefault` (#1627)
+* ADDED: Added `shortenviashlink` endpoint with an `shlink` configuration section
+* ADDED: Password peek (#1254)
+* CHANGED: CSP recommendation around bootstrap5 template resolved in Firefox 131 (#1613)
+* CHANGED: Upgrading libraries to: bootstrap 5.3.8, DOMpurify 3.2.7 & ip-lib 1.21.0
+* FIXED: Allow pasting a password for decrypting a paste (#1620)
+* FIXED: Allow copying the shortened link after using a URL shortener (#1624)
+* FIXED: URL extraction fails when frame-ancestors is set in CSP (#1644)
+* FIXED: traffic limiter not working when using Filesystem storage and PHP opcache
+
+## 2.0.0 (2025-07-28)
+* ADDED: Error logging in database and filesystem backend (#1554)
+* ADDED: Statistics on v1 pastes in administration script and option to delete them
+* CHANGED: Removed page template (#265)
+* CHANGED: Removed support for ZeroBin & v1 pastes - since release 1.3 the v2 format is used (#551)
+* CHANGED: Removed use of base64 & rawinflate libraries (#551)
+* CHANGED: Removed support for `privatebin_data`, `privatebin_db` & `zerobin_db` model class configurations, must be replaced with `Filesystem` or `Database` in `cfg/conf.php`, if still present
+* CHANGED: Removed unused columns in database schema of tables `paste` & `comment`
+* CHANGED: Jdenticons are now used as the default icons
+* CHANGED: Upgrading libraries to: base-x 5.0.1, bootstrap 5.3.7, jdenticon 2.0.0 & kjua 0.10.0
+* CHANGED: Minimum required PHP version is 7.4, due to a change in the jdenticon library
+* CHANGED: Set bootstrap5 template as default for PrivateBin (#1572)
+* CHANGED: Switched from binary bytes to SI-units (#1565)
+* CHANGED: Replaced the term "paste" with the more generic "document" (#397)
+* FIXED: Name mismatches in attached files (#1584)
+* FIXED: Unable to paste attachments from clipboard (#1589)
+* FIXED: Configuration combinations test errors
+
+## 1.7.8 (2025-06-30)
+* FIXED: Duplicate attachment for every comment (#1577)
+* FIXED: Attachments with empty file names (#1577)
+* FIXED: Page template scripts loading order (#1579)
+
+## 1.7.7 (2025-06-28)
+* ADDED: Switching templates using the web UI (#1501)
+* ADDED: Show file name and size on download page (#603)
 * CHANGED: Passing large data structures by reference to reduce memory consumption (#858)
 * CHANGED: Removed use of ctype functions and polyfill library for ctype
-* CHANGED: Upgrading libraries to: DOMpurify 3.2.5, ip-lib 1.20.0
+* CHANGED: Upgrading libraries to: DOMpurify 3.2.6, ip-lib 1.20.0
 * CHANGED: Support for multiple file uploads (#1060)
 * CHANGED: Documented CSP change necessary to allow PDF attachment preview (#1552)
 * FIXED: Hide Reply button in the discussions once clicked to avoid losing the text input (#1508)
+* FIXED: Bump zlib library suffix, ensuring cache refresh for WASM streaming change
+* FIXED: Handle undefined globals in file based persisted values (#1544)
 
 ## 1.7.6 (2025-02-01)
 * ADDED: Ability to copy the paste by clicking the copy icon button or using the keyboard shortcut ctrl+c/cmd+c (#1390 & #12)
@@ -36,7 +113,7 @@
 * FIXED: Reset password input field on creation of new paste (#1194)
 * FIXED: Allow database schema upgrade to skip versions (#1343)
 * FIXED: `bootstrap5` dark mode toggle unset on dark browser preference (#1340)
-* FIXED: Prevent bypassing YOURLS proxy URL filter, allowing to shorten non-self URLs
+* FIXED: Prevent bypassing YOURLS proxy URL filter, allowing to shorten non-self URLs ([CVE-2024-39899](https://privatebin.info/reports/vulnerability-2024-07-09.html))
 
 ## 1.7.3 (2024-05-13)
 * CHANGED: Various tweaks of the `bootstrap5` template, suggested by the community
@@ -116,7 +193,7 @@
 * ADDED: Oracle database support (#868)
 * ADDED: Configuration option to limit paste creation and commenting to certain IPs (#883)
 * ADDED: Set CSP also as meta tag, to deal with misconfigured webservers mangling the HTTP header
-* ADDED: Sanitize SVG preview, preventing script execution in instance context
+* ADDED: Sanitize SVG preview, preventing script execution in instance context ([CVE-2022-24833](https://privatebin.info/reports/vulnerability-2022-04-09.html))
 * CHANGED: Language selection cookie only transmitted over HTTPS (#472)
 * CHANGED: Upgrading libraries to: base-x 4.0.0, bootstrap 3.4.1 (JS), DOMpurify 2.3.6, ip-lib 1.18.0, jQuery 3.6.0, random_compat 2.0.21, Showdown 2.0.3 & zlib 1.2.12
 * CHANGED: Removed automatic `.ini` configuration file migration (#808)
@@ -168,12 +245,12 @@
 * ADDED: Option to send a mail with the link, when creating a paste (#398)
 * ADDED: Add support for CONFIG_PATH environment variable (#552)
 * CHANGED: Upgrading libraries to: base-x 3.0.7, DOMpurify 2.0.7 & Showdown 1.9.1
-* FIXED: HTML injection via unescaped attachment filename (#554)
+* FIXED: HTML injection via unescaped attachment filename (#554) ([CVE-2020-5223](https://privatebin.info/reports/vulnerability-2020-01-11.html))
 * FIXED: Password disabling option (#527)
 
 ## 1.2.2 (2020-01-11)
 * CHANGED: Upgrading libraries to: bootstrap 3.4.1 (CSS), DOMpurify 2.0.7, jQuery 3.4.1, kjua 0.6.0, Showdown 1.9.1 & SJCL 1.0.8
-* FIXED: HTML injection via unescaped attachment filename (#554)
+* FIXED: HTML injection via unescaped attachment filename (#554) ([CVE-2020-5223](https://privatebin.info/reports/vulnerability-2020-01-11.html))
 
 ## 1.3.1 (2019-09-22)
 * ADDED: Translation for Bulgarian (#455)
@@ -217,7 +294,7 @@
 * CHANGED: Added some missing Russian translations (#348)
 * CHANGED: Minor PHP refactoring: Rename PrivateBin class to Controller, improved logic of some persistence classes (#342)
 * CHANGED: Upgrading DOMpurify library to 1.0.7
-* FIXED: Ensure legacy browsers without webcrypto support can't create paste keys with insufficient entropy (#346)
+* FIXED: Ensure legacy browsers without webcrypto support can't create paste keys with [insufficient entropy](https://privatebin.info/reports/vulnerability-2018-08-11.html) (#346)
 * FIXED: Re-add support for old browsers (Firefox&lt;21, Chrome&lt;31, Safari&lt;7, IE&lt;11), broken in 1.2, will be removed again in 1.3
 
 ## 1.2 (2018-07-22)
@@ -236,7 +313,7 @@
 * FIXED: To counteract regressions introduced by the refactoring, we finally introduced property based unit testing for the JavaScript code, this caught several regressions, but also some very old bugs not found so far (#32)
 
 ## 1.1.1 (2017-10-06)
-* CHANGED: Switched to `.php` file extension for configuration file, to avoid leaking configuration data in unprotected installation.
+* CHANGED: Switched to `.php` file extension for configuration file, to avoid [leaking configuration data](https://privatebin.info/reports/vulnerability-2017-09-29.html) in unprotected installation.
 
 ## 1.1 (2016-12-26)
 * ADDED: Translations for Italian and Russian
@@ -277,7 +354,7 @@
 * FIXED: Removed unused code detected with the help of various code review tools
 * FIXED: Table format for PostgreSQL, making it possible to use PostgreSQL as backend in addition to MySQL, SQLite and flat files
 
-## 0.22 (2015-11-09):
+## 0.22 (2015-11-09)
 * ADDED: Tab character input support
 * ADDED: Dark bootstrap theme
 * ADDED: Option to hide clone button on expiring pastes
@@ -293,13 +370,13 @@
 * CHANGED: Database structure to store attachments, allowing larger attachments to be stored (depending on maximum BLOB size of database backend)
 * CHANGED: Refactored data model, traffic limiting & request handling
 
-## 0.21.1 (2015-09-21):
+## 0.21.1 (2015-09-21)
 * FIXING: lost meta data when using DB model instead of flat files
 * FIXING: mobile navbar getting triggered on load
 * CHANGED: database table "paste" gets automatically extended with a "meta" column
 * CHANGED: navbar of "bootstrap" template now spans full width of view port on large screens
 
-## 0.21 (2015-09-19):
+## 0.21 (2015-09-19)
 * ADDED: Translations for German, French and Polish, language selection menu (optional)
 * ADDED: File upload and image display support (optional)
 * ADDED: Markdown format support
@@ -317,7 +394,7 @@ encryption), i18n (translation, counterpart of i18n.php) and helper (stateless u
   * [Translation](https://github.com/PrivateBin/PrivateBin/wiki/Translation)
   * [Templates](https://github.com/PrivateBin/PrivateBin/wiki/Templates)
 
-## 0.20 (2015-09-03):
+## 0.20 (2015-09-03)
 * ADDED: Password protected pastes (optional)
 * ADDED: configuration options for highlighting, password, discussions, expiration times, rate limiting
 * ADDED: JSON-only retrieval of paste incl. discussion, used to be able to refresh paste when posting a comment
@@ -328,11 +405,11 @@ encryption), i18n (translation, counterpart of i18n.php) and helper (stateless u
 * updated JS libraries: jquery to 1.11.3, sjcl to 1.0.2, base64.js to 2.1.9, deflate to 0.5, inflate to 0.3 and prettify to latest
 * generally improved documentation, both inline phpdoc / JSdoc source code documentation, as well as Wiki pages on installation, configuration, development and JSON-API
 
-## Alpha 0.19 (2013-07-05):
+## Alpha 0.19 (2013-07-05)
 * Corrected XSS security flaw which affected IE<10. Other browsers were not affected.
 * Corrected spacing display in IE<10.
 
-## Alpha 0.18 (2013-02-24):
+## Alpha 0.18 (2013-02-24)
 * ADDED: The resulting URL is automatically selected after pressing "Send". You just have to press CTRL+C.
 * ADDED: Automatic syntax highlighting for 53 languages using highlight.js
 * ADDED: "5 minutes" and "1 week" expirations.
@@ -346,32 +423,32 @@ encryption), i18n (translation, counterpart of i18n.php) and helper (stateless u
 * ADDED: Added version to js/css assets URLs in order to prevent some abusive caches to serve an obsolete version of these files when ZeroBin is upgraded.
 * "Burn after reading" option has been moved out of Expiration combo to a separate checkbox. Reason is: You can prevent a read-once paste to be available ad vitam eternam on the net.
 
-## Alpha 0.17 (2013-02-23):
+## Alpha 0.17 (2013-02-23)
 * ADDED: Deletion URL.
 * small refactoring.
 * improved regex checks.
 * larger server alt on installation.
 
-## Alpha 0.16:
+## Alpha 0.16
 * FIXED minor php warnings.
 * FIXED: zerobin.js reformated and properly commented.
 * FIXED: Directory structure re-organized.
 * CHANGED: URL shortening button was removed. (It was bad for privacy.)
 
-## Alpha 0.15 (2012-04-20):
+## Alpha 0.15 (2012-04-20)
 * FIXED: 2 minor corrections to avoid notices in php log.
 * FIXED: Sources converted to UTF-8.
 
-## Alpha 0.14 (2012-04-20):
+## Alpha 0.14 (2012-04-20)
 * ADDED: GD presence is checked.
 * CHANGED: Traffic limiter data files moved to data/ (→easier rights management)
 * ADDED: "Burn after reading" implemented. Opening the URL will display the paste and immediately destroy it on server.
 
-## Alpha 0.13 (2012-04-18):
+## Alpha 0.13 (2012-04-18)
 * FIXED: ''imageantialias()'' call removed because it's not really usefull and can be a problem on most hosts (if GD is not compiled in php).
 * FIXED: $error not properly initialized in index.php
 
-## Alpha 0.12 (2012-04-18):
+## Alpha 0.12 (2012-04-18)
   ## DISCUSSIONS ! Now you can enable discussions on your pastes. Of course, posted comments and nickname are also encrypted and the server cannot see them.
 * This feature implies a change in storage format. You will have to delete all previous pastes in your ZeroBin.
 * Added [[php:vizhash_gd|Vizhash]] as avatars, so you can match posters IP addresses without revealing them. (Same image = same IP). Of course the IP address cannot be deduced from the Vizhash.
@@ -379,17 +456,17 @@ encryption), i18n (translation, counterpart of i18n.php) and helper (stateless u
 * Explicit tags were added to CSS and jQuery selectors (eg. div#aaa instead of #aaa) to speed up browser.
 * Better cleaning of the URL (to make sure the key is not broken by some stupid redirection service)
 
-## Alpha 0.11 (2012-04-12):
+## Alpha 0.11 (2012-04-12)
 * Automatically ignore parameters (such as &utm_source=...) added //after// the anchor by some stupid Web 2.0 services.
 * First public release.
 
-## Alpha 0.10 (2012-04-12):
+## Alpha 0.10 (2012-04-12)
 * IE9 does not seem to correctly support ''pre-wrap'' either. Special handling mode activated for all version of IE<10. (Note: ALL other browsers correctly support this feature.)
 
-## Alpha 0.9 (2012-04-11):
+## Alpha 0.9 (2012-04-11)
 * Oh bummer... IE 8 is as shitty as IE6/7: Its does not seem to support ''white-space:pre-wrap'' correctly. I had to activate the special handling mode. I still have to test IE 9.
 
-## Alpha 0.8 (2012-04-11):
+## Alpha 0.8 (2012-04-11)
 * Source code not published yet.
 * Interface completely redesigned. Icons added.
 * Now properly supports IE6/7 (ugly display, but it works. "Clone" button is disabled though.)
