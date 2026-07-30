@@ -640,8 +640,7 @@ endif;
 			<footer class="container">
 				<div class="row">
 					<h4 class="col-md-5 col-xs-8"><small><?php echo I18n::_(''); ?></small></h4>
-					<p class="col-md-1 col-xs-4 text-center">v<?php echo $VERSION; ?></p>
-					<p id="aboutbox" class="col-md-6 col-xs-12">
+					<p id="aboutbox" class="col-md-7 col-xs-12">
 						<?php echo sprintf(
 					        I18n::_('%s is based on PrivateBin and is a minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted in the browser using 256 bits AES.',
 					            I18n::_($NAME),
