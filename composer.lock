@@ -2015,7 +2015,7 @@
     },
     "platform-dev": [],
     "platform-overrides": {
-        "php": "7.3"
+        "php": "8.2"
     },
     "plugin-api-version": "2.3.0"
 }
