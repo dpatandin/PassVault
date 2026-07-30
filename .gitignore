@@ -41,3 +41,6 @@ tst/.phpunit.result.cache
 .c9
 /.idea/
 *.iml
+
+# macOS
+.DS_Store
