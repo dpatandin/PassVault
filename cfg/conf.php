@@ -11,6 +11,7 @@ name = "PassVault"
 ; PrivateBin files, including an ending slash (/). This URL is essential to
 ; allow Opengraph images to be displayed on social networks.
 ; basepath = "https://privatebin.example.com/"
+basepath = "https://passvault.info/"
 
 ; enable or disable the discussion feature, defaults to true
 discussion = false
