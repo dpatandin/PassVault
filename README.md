@@ -1,110 +1,115 @@
-# [![PrivateBin](https://raw.githubusercontent.com/PrivateBin/assets/master/images/preview/logoSmall.png)](https://privatebin.info/)
+# PassVault
 
-*Current version: 2.0.5*
+**PassVault** is a self-hosted, minimalist, zero-knowledge
+[pastebin](https://en.wikipedia.org/wiki/Pastebin). Data is encrypted and
+decrypted **in the browser** using 256-bit AES in
+[Galois Counter mode](https://en.wikipedia.org/wiki/Galois/Counter_Mode) — the
+server only ever stores ciphertext and has no way to read your content.
 
-**PrivateBin** is a minimalist, open source online
-[pastebin](https://en.wikipedia.org/wiki/Pastebin)
-where the server has zero knowledge of stored data.
+PassVault is a lightly customized fork of
+[PrivateBin](https://github.com/PrivateBin/PrivateBin) (itself a fork of ZeroBin
+by [Sébastien Sauvage](https://github.com/sebsauvage/ZeroBin)), rebranded and
+tuned for a specific deployment. See [Relationship to PrivateBin](#relationship-to-privatebin).
 
-Data is encrypted and decrypted in the browser using 256bit AES in
-[Galois Counter mode](https://en.wikipedia.org/wiki/Galois/Counter_Mode).
+## Current state
 
-This is a fork of ZeroBin, originally developed by
-[Sébastien Sauvage](https://github.com/sebsauvage/ZeroBin). PrivateBin was
-refactored to allow easier and cleaner extensions and has many additional
-features.
+| | |
+|---|---|
+| Upstream base | PrivateBin **2.0.5** |
+| Runtime | **PHP 8.4** (FrankenPHP) |
+| Front-end template | **Bootstrap 5** |
+| Storage | Filesystem (`/app/data`, persistent volume) |
+| Hosting | [Railway](https://railway.app) via [Railpack](https://railpack.com) + FrankenPHP/Caddy |
+| Language | English only |
 
-## What PrivateBin provides
+## Features (as configured)
 
-+ As a server administrator you don't have to worry if your users post content
-  that is considered illegal in your country. You have plausible deniability of
-  any of the pastes content. If requested or enforced, you can delete any paste
-  from your system.
+- End-to-end encrypted documents; the server has zero knowledge of content.
+- **Password protection** for documents (optional per document).
+- **Burn-after-reading** (preselected by default).
+- **Expiry** options: 1 hour, 1 day, **3 days**, 1 week (default: 1 week).
+- Formats: Plain Text, Source Code (syntax highlighting), Markdown (with preview).
+- QR code and e-mail sharing of document links.
+- Rate limiting (10 s between posts per IP).
 
-+ Pastebin-like system to store text documents, code samples, etc.
+Disabled in this instance: discussions/comments, file uploads, language
+selection, compression, and the URL shortener.
 
-+ Encryption of data sent to server.
+## Security
 
-+ Possibility to set a password which is required to read the paste. It further
-  protects a paste and prevents people stumbling upon your paste's link
-  from being able to read it without the password.
+- Served over **HTTPS** with **HSTS** (`Strict-Transport-Security`).
+- Strict **Content-Security-Policy** (`default-src 'none'`, `script-src 'self'`,
+  `frame-ancestors 'none'`, sandboxed), `X-Frame-Options: deny`,
+  `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
+  `Secure` + `SameSite=Lax` cookies.
+- A custom `Caddyfile` returns **404** for source/metadata paths
+  (`*.md`, `composer.*`, `/vendor/*`, `/bin/*`, `/tst/*`, `/cfg/*`, …), since
+  Caddy does not honor PrivateBin's `.htaccess` protections.
+- Runs a current, supported PHP (8.4) and PrivateBin (2.0.5, which fixes
+  CVE-2026-55891).
 
-## What it doesn't provide
+## Configuration
 
-- As a user you have to trust the server administrator not to inject any
-  malicious code. For security, a PrivateBin installation *has to be used over*
-  *HTTPS*! Otherwise you would also have to trust your internet provider, and
-  any jurisdiction the traffic passes through. Additionally the instance should
-  be secured by
-  [HSTS](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security). It can
-  use traditional certificate authorities and/or use a
-  [DNSSEC](https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions)
-  protected
-  [DANE](https://en.wikipedia.org/wiki/DNS-based_Authentication_of_Named_Entities)
-  record.
+Runtime configuration lives in `cfg/conf.php`. Because Railpack/FrankenPHP's
+working directory is not the app root, the config is located via the
+**`CONFIG_PATH=/app/cfg`** environment variable (set in Railway), and the data
+directory is pinned to the mounted volume with `dir = "/app/data"`.
 
-- The “key” used to encrypt the paste is part of the URL (in
-  [the fragment part separated by the `#`](https://en.wikipedia.org/wiki/URL#fragment)).
-  If you publicly post the URL of a paste that is not password-protected, anyone
-  can read it.
-  Use a password if you want your paste to remain private. In that case, make
-  sure to use a strong password and share it privately and end-to-end-encrypted.
+Full reference: the [PrivateBin configuration
+wiki](https://github.com/PrivateBin/PrivateBin/wiki/Configuration).
 
-- A server admin can be forced to hand over access logs to the authorities.
-  PrivateBin encrypts your text and the discussion contents, but who accessed a
-  paste (first) might still be disclosed via access logs.
+## Deployment
 
-- In case of a server breach your data is secure as it is only stored encrypted
-  on the server. However, the server could be abused or the server admin could
-  be legally forced into sending malicious code to their users, which logs
-  the decryption key and sends it to a server when a user accesses a paste.
-  Therefore, do not access any PrivateBin instance if you think it has been
-  compromised. As long as no user accesses this instance with a previously
-  generated URL, the content can't be decrypted.
+The Railway service auto-deploys on push to `master`:
 
-## Options
+```bash
+git push origin master
+```
 
-Some features are optional and can be enabled or disabled in the [configuration
-file](https://github.com/PrivateBin/PrivateBin/wiki/Configuration):
+Railpack detects PHP from `composer.json`, runs `composer install`, and serves
+the app with FrankenPHP using the repository's custom `/Caddyfile`.
 
-* Password protection
+Notes for maintainers:
+- **PHP version** is pinned in `composer.json` (`require.php` + `config.platform.php`)
+  and `composer.lock` (`platform-overrides`). Use a single constraint like
+  `^8.4` — Railpack's resolver cannot handle `||` (OR) constraints.
+- The persistent data volume is mounted at `/app/data`; documents survive
+  redeploys. Existing PrivateBin filesystem data is read as-is (no migration).
 
-* Discussions, anonymous or with nicknames and IP based identicons or vizhashes
+## Editing bundled assets (important)
 
-* Expiration times, including a "forever" and "burn after reading" option
+Every bundled `js/` (and `css/`) file has a **Subresource Integrity** hash in
+`lib/Configuration.php`. If you edit an asset without updating its hash, the
+browser silently refuses to load the script and the app hangs on *"Loading…"*.
+After changing any asset, regenerate the hashes:
 
-* Markdown format support for HTML formatted pastes, including preview function
+```bash
+python3 bin/update-sri.py          # rewrite stale hashes
+python3 bin/update-sri.py --check  # verify (non-zero exit if stale) — good for CI
+```
 
-* Syntax highlighting for source code using prettify.js, including 4 prettify
-  themes
+## Relationship to PrivateBin
 
-* File upload support, image, media and PDF preview (disabled by default, size
-  limit adjustable)
+PassVault tracks upstream PrivateBin and re-applies a small set of
+customizations on upgrade:
 
-* Templates: By default there are bootstrap5, bootstrap CSS and darkstrap
-  to choose from and it is easy to adapt these to your own websites layout or
-  create your own.
+- **Branding** — name "PassVault", rebranded icons/favicons, `manifest.json`;
+  footer version number, tagline and info text removed.
+- **Custom 3-day expiry** — a rewritten `Helper.durationToSeconds` in
+  `js/privatebin.js` that parses plural units (so the `3days` expiry key works).
+- **Asset cache-busting** — `lib/View.php` appends the file mtime to
+  non-versioned assets so edits reload reliably.
+- **Deployment glue** — `/Caddyfile` (HSTS + path blocking), `bin/update-sri.py`,
+  PHP version pin, `robots.txt` opt-out of the public directory.
+- **Trimmed** — English-only i18n; `symfony/polyfill-php80` dropped (inert on
+  PHP 8+).
 
-* Translation system and automatic browser language detection (if enabled in
-  browser)
+To upgrade the upstream base, re-base on a clean PrivateBin release and re-apply
+the items above, then regenerate SRI hashes and redeploy.
 
-* Language selection (disabled by default, as it uses a session cookie)
+## Credits & license
 
-* QR code for paste URLs, to easily transfer them over to mobile devices
-
-## Further resources
-
-* [FAQ](https://github.com/PrivateBin/PrivateBin/wiki/FAQ)
-
-* [Installation guide](https://github.com/PrivateBin/PrivateBin/blob/master/doc/Installation.md#installation)
-
-* [Configuration guide](https://github.com/PrivateBin/PrivateBin/wiki/Configuration)
-
-* [Templates](https://github.com/PrivateBin/PrivateBin/wiki/Templates)
-
-* [Translation guide](https://github.com/PrivateBin/PrivateBin/wiki/Translation)
-
-* [Developer guide](https://github.com/PrivateBin/PrivateBin/wiki/Development)
-
-Run into any issues? Have ideas for further developments? Please
-[report](https://github.com/PrivateBin/PrivateBin/issues) them!
+PassVault is built on [PrivateBin](https://github.com/PrivateBin/PrivateBin).
+All credit for the underlying zero-knowledge pastebin design and implementation
+goes to the PrivateBin authors and contributors. Distributed under the
+[zlib/libpng license](LICENSE.md), the same license as PrivateBin.
