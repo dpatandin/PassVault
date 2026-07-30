@@ -1,0 +1,54 @@
+# Custom Caddyfile for PassVault (Railpack / FrankenPHP).
+#
+# Based on Railpack's default PHP Caddyfile:
+#   https://github.com/railwayapp/railpack/blob/main/core/providers/php/Caddyfile
+# Providing this file overrides that default, so it must stay complete.
+#
+# Deltas vs the default:
+#   1. Adds an HSTS response header.
+#   2. Blocks direct HTTP access to source / metadata files. PrivateBin normally
+#      protects these with .htaccess, but Caddy ignores .htaccess.
+# The root and file_server/php_server handling are unchanged from the default.
+
+{
+	admin off
+	persist_config off
+	auto_https off
+
+	{$CADDY_GLOBAL_OPTIONS}
+
+	log {
+		format json
+		output stderr
+		level DEBUG
+	}
+
+	frankenphp {
+		{$FRANKENPHP_CONFIG}
+	}
+}
+
+{$CADDY_EXTRA_CONFIG}
+
+:{$PORT:80} {
+	root * /app
+
+	encode zstd br gzip
+
+	# --- delta 1: HSTS (clients receive responses over HTTPS via Railway's edge) ---
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+	# --- delta 2: never serve source/metadata files as static content ---
+	# NB: does NOT match manifest.json / robots.txt / app assets (css,js,img).
+	@denied path *.md *.yml *.yaml *.lock *.py /Makefile /composer.* /vendor/* /bin/* /tst/* /cfg/*
+	respond @denied 404
+
+	file_server {
+		hide .git
+		hide .env*
+	}
+
+	{$CADDY_SERVER_EXTRA_DIRECTIVES}
+
+	php_server
+}
