@@ -1,0 +1,79 @@
+/**
+ * PassVault — custom theme layer for the Bootstrap 5 template.
+ *
+ * A small, clean override sheet: smaller base type, a monospace editor
+ * surface, a tighter toolbar and soft, theme-aware borders. Loaded after
+ * bootstrap-5.3.8.css and privatebin.css so these rules win.
+ *
+ * Not part of upstream PrivateBin — re-apply on upgrade (see README).
+ */
+
+/* Smaller base: Bootstrap sizes everything in rem, so the whole UI scales down. */
+html { font-size: 14px; }
+body { letter-spacing: .1px; }
+
+:root { --pv-radius: .55rem; }
+[data-bs-theme="light"] { --pv-border: rgba(0, 0, 0, .12); --pv-surface: #fbfbfc; }
+[data-bs-theme="dark"]  { --pv-border: rgba(255, 255, 255, .12); --pv-surface: #1b2027; }
+
+/* Editor + viewer: clean monospace. */
+#message,
+#prettyprint,
+pre {
+	font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+	font-size: .92rem;
+	line-height: 1.55;
+}
+
+/* Editor as a distinct, discoverable surface. */
+#message,
+textarea.form-control {
+	background: var(--pv-surface);
+	border: 1px solid var(--pv-border) !important;
+	border-radius: var(--pv-radius);
+	padding: .8rem 1rem;
+}
+
+#message:focus,
+textarea.form-control:focus {
+	border-color: var(--bs-primary) !important;
+	box-shadow: 0 0 0 .18rem rgba(13, 110, 253, .15);
+}
+
+/* Tighter, quieter toolbar. */
+.navbar {
+	padding-top: .35rem;
+	padding-bottom: .35rem;
+	border-bottom: 1px solid var(--pv-border);
+}
+
+.navbar .btn,
+.navbar .form-select,
+.navbar .form-control,
+.navbar label {
+	font-size: .9rem;
+}
+
+/* Consistent rounding, soft borders, flat chrome. */
+.btn,
+.form-select,
+.form-control,
+.card {
+	border-radius: var(--pv-radius);
+}
+
+.form-select,
+.form-control,
+.card {
+	border-color: var(--pv-border) !important;
+}
+
+.card,
+.btn {
+	box-shadow: none;
+}
+
+/* Muted, smaller footer + helper text; keep the editor the focus. */
+footer { margin-top: 1.25rem; }
+#aboutbox { font-size: .8rem; opacity: .65; }
+.checkbox label { font-size: .85rem; }

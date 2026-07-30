@@ -95,6 +95,9 @@ customizations on upgrade:
 
 - **Branding** — name "PassVault", rebranded icons/favicons, `manifest.json`;
   footer version number, tagline and info text removed.
+- **Custom theme** — `css/bootstrap5/passvault.css` (smaller 14px base, monospace
+  editor surface, tighter toolbar, soft theme-aware borders), linked from
+  `tpl/bootstrap5.php` after `privatebin.css`.
 - **Custom 3-day expiry** — a rewritten `Helper.durationToSeconds` in
   `js/privatebin.js` that parses plural units (so the `3days` expiry key works).
 - **Asset cache-busting** — `lib/View.php` appends the file mtime to
