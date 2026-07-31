@@ -194,7 +194,10 @@ limit = 10
 
 ; (optional) if your website runs behind a reverse proxy or load balancer,
 ; set the HTTP header containing the visitors IP address, i.e. X_FORWARDED_FOR
-; header = "X_FORWARDED_FOR"
+; PassVault runs behind Cloudflare (proxied) in front of Railway; Cloudflare
+; sends the real visitor IP in the CF-Connecting-IP header, so rate limiting
+; keys off that instead of Railway's proxy IP. Falls back to REMOTE_ADDR if absent.
+header = "CF_CONNECTING_IP"
 
 [purge]
 ; minimum time limit between two purgings of expired pastes, it is only
