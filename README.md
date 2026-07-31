@@ -46,11 +46,17 @@ selection, compression, and the URL shortener.
 - **Security headers on every response** — set at the Caddy layer (not just in
   PHP) so static assets get them too: `X-Content-Type-Options: nosniff`,
   `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`; `X-Powered-By` stripped.
-- Strict **Content-Security-Policy** on HTML (`default-src 'none'`,
-  `script-src 'self'`, `frame-ancestors 'none'`, sandboxed) with
-  **`connect-src 'self'`** (tightened from the upstream `*` default); static
-  assets get a locked-down `default-src 'none'` CSP. `Secure` + `SameSite=Lax`
-  cookies.
+- **Two-tier Content-Security-Policy:**
+  - HTML pages get PrivateBin's rich policy (`default-src 'none'`,
+    `script-src 'self'`, `frame-ancestors 'none'`, sandboxed) with
+    **`connect-src 'self'`** (tightened from the upstream `*` default).
+  - Every **other** response (static assets, 404s, …) gets a locked-down
+    `default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; sandbox`.
+    The Caddyfile applies this as a *default* (only when the response has no CSP),
+    so it covers non-PHP responses without overriding the HTML policy. It
+    includes the directives that don't fall back to `default-src`
+    (`frame-ancestors`/`base-uri`/`form-action`) and no `unsafe-inline`.
+  - `Secure` + `SameSite=Lax` cookies.
 - Fronted by **Cloudflare** (proxied, SSL/TLS mode **Full**); TLS is terminated
   at the edge. **Zero-knowledge is preserved** — content is encrypted in the
   browser and the key lives in the URL fragment (`#…`), so neither Cloudflare nor
@@ -140,10 +146,12 @@ customizations on upgrade:
   non-versioned assets so edits reload reliably.
 - **Security hardening** — `/Caddyfile` sets security headers on all responses
   (HSTS, nosniff, `X-Frame-Options`, `Referrer-Policy`), strips `X-Powered-By`,
-  blocks source/metadata paths, and applies a locked-down CSP to static assets;
-  `conf.php` `cspheader` tightens `connect-src` to `'self'`; **DOMPurify bumped
-  to 3.4.12** (`js/purify-3.4.12.js` + template refs + SRI — re-check on re-base,
-  as upstream may ship a different version).
+  blocks source/metadata paths, and applies a locked-down CSP as a *default*
+  (Caddy `?Content-Security-Policy`) to every response that lacks one — static
+  assets and 404s — without overriding the app's HTML CSP; `conf.php` `cspheader`
+  tightens `connect-src` to `'self'`; **DOMPurify bumped to 3.4.12**
+  (`js/purify-3.4.12.js` + template refs + SRI — re-check on re-base, as upstream
+  may ship a different version).
 - **Deployment glue** — `bin/update-sri.py`, PHP version pin, `robots.txt`
   opt-out; `conf.php` `basepath` and `[traffic] header = CF_CONNECTING_IP`.
 - **Trimmed** — English-only i18n; `symfony/polyfill-php80` dropped (inert on
