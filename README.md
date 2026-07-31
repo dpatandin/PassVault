@@ -1,8 +1,9 @@
 # PassVault
 
 **PassVault** is a self-hosted, minimalist, zero-knowledge
-[pastebin](https://en.wikipedia.org/wiki/Pastebin). Data is encrypted and
-decrypted **in the browser** using 256-bit AES in
+[pastebin](https://en.wikipedia.org/wiki/Pastebin), live at
+**https://passvault.info**. Data is encrypted and decrypted **in the browser**
+using 256-bit AES in
 [Galois Counter mode](https://en.wikipedia.org/wiki/Galois/Counter_Mode) — the
 server only ever stores ciphertext and has no way to read your content.
 
@@ -15,11 +16,14 @@ tuned for a specific deployment. See [Relationship to PrivateBin](#relationship-
 
 | | |
 |---|---|
+| Live URL | **https://passvault.info** |
 | Upstream base | PrivateBin **2.0.5** |
 | Runtime | **PHP 8.4** (FrankenPHP) |
 | Front-end template | **Bootstrap 5** |
 | Storage | Filesystem (`/app/data`, persistent volume) |
 | Hosting | [Railway](https://railway.app) via [Railpack](https://railpack.com) + FrankenPHP/Caddy |
+| DNS / edge | [Cloudflare](https://www.cloudflare.com) (proxied, SSL/TLS mode **Full**); registrar: Hostinger |
+| Analytics | Cloudflare edge — cookieless (visitors, geography, referrers) |
 | Language | English only |
 
 ## Features (as configured)
@@ -30,7 +34,8 @@ tuned for a specific deployment. See [Relationship to PrivateBin](#relationship-
 - **Expiry** options: 1 hour, 1 day, **3 days**, 1 week (default: 1 week).
 - Formats: Plain Text, Source Code (syntax highlighting), Markdown (with preview).
 - QR code and e-mail sharing of document links.
-- Rate limiting (10 s between posts per IP).
+- Rate limiting (10 s between posts per visitor, keyed off the real client IP —
+  see the Cloudflare note under [Configuration](#configuration)).
 
 Disabled in this instance: discussions/comments, file uploads, language
 selection, compression, and the URL shortener.
@@ -42,6 +47,10 @@ selection, compression, and the URL shortener.
   `frame-ancestors 'none'`, sandboxed), `X-Frame-Options: deny`,
   `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
   `Secure` + `SameSite=Lax` cookies.
+- Fronted by **Cloudflare** (proxied, SSL/TLS mode **Full**); TLS is terminated
+  at the edge. **Zero-knowledge is preserved** — content is encrypted in the
+  browser and the key lives in the URL fragment (`#…`), so neither Cloudflare nor
+  Railway ever sees plaintext or decryption keys.
 - A custom `Caddyfile` returns **404** for source/metadata paths
   (`*.md`, `composer.*`, `/vendor/*`, `/bin/*`, `/tst/*`, `/cfg/*`, …), since
   Caddy does not honor PrivateBin's `.htaccess` protections.
@@ -55,8 +64,28 @@ working directory is not the app root, the config is located via the
 **`CONFIG_PATH=/app/cfg`** environment variable (set in Railway), and the data
 directory is pinned to the mounted volume with `dir = "/app/data"`.
 
+Deployment-specific settings of note:
+- `basepath = "https://passvault.info/"` — used for absolute/OpenGraph URLs.
+- `[traffic] header = "CF_CONNECTING_IP"` — because the app sits behind
+  Cloudflare's proxy, the real visitor IP arrives in the `CF-Connecting-IP`
+  header. Rate limiting keys off that (with a `REMOTE_ADDR` fallback); otherwise
+  every request would look like it came from Cloudflare's IP.
+
 Full reference: the [PrivateBin configuration
 wiki](https://github.com/PrivateBin/PrivateBin/wiki/Configuration).
+
+## Domain & DNS
+
+`passvault.info` is registered at **Hostinger**, but its **nameservers point to
+Cloudflare**, which manages DNS. In Cloudflare:
+- Apex `passvault.info` → **proxied (orange-cloud) CNAME** to the Railway target
+  (Cloudflare flattens the apex CNAME to an A record automatically).
+- `_railway-verify` **TXT** record for Railway's domain verification.
+- **SSL/TLS mode must be `Full`** (not Full-strict — it breaks with Railway; not
+  Flexible — it causes redirect loops).
+
+Proxying (orange cloud) is what enables the edge analytics and lets Cloudflare
+absorb bot traffic; it does not affect the zero-knowledge guarantee.
 
 ## Deployment
 
@@ -103,7 +132,8 @@ customizations on upgrade:
 - **Asset cache-busting** — `lib/View.php` appends the file mtime to
   non-versioned assets so edits reload reliably.
 - **Deployment glue** — `/Caddyfile` (HSTS + path blocking), `bin/update-sri.py`,
-  PHP version pin, `robots.txt` opt-out of the public directory.
+  PHP version pin, `robots.txt` opt-out; `conf.php` `basepath` and
+  `[traffic] header = CF_CONNECTING_IP`.
 - **Trimmed** — English-only i18n; `symfony/polyfill-php80` dropped (inert on
   PHP 8+).
 
