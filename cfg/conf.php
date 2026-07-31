@@ -132,6 +132,11 @@ email = true
 ;
 ; The recommended and default used CSP is:
 ; cspheader = "default-src 'none'; base-uri 'self'; form-action 'none'; manifest-src 'self'; connect-src * blob:; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; font-src 'self'; frame-ancestors 'none'; frame-src blob:; img-src 'self' data: blob:; media-src blob:; object-src blob:; sandbox allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+;
+; PassVault: the default with connect-src tightened from the "*" wildcard to
+; 'self' (the app only ever connects to its own origin) to close the ZAP
+; "CSP wildcard directive" finding. Keeps blob: for in-browser blob handling.
+cspheader = "default-src 'none'; base-uri 'self'; form-action 'none'; manifest-src 'self'; connect-src 'self' blob:; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; font-src 'self'; frame-ancestors 'none'; frame-src blob:; img-src 'self' data: blob:; media-src blob:; object-src blob:; sandbox allow-same-origin allow-scripts allow-forms allow-modals allow-downloads"
 
 ; stay compatible with PrivateBin Alpha 0.19, less secure
 ; if enabled will use base64.js version 1.7 instead of 2.1.9 and sha1 instead of

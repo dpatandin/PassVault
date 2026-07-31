@@ -5,7 +5,9 @@
 # Providing this file overrides that default, so it must stay complete.
 #
 # Deltas vs the default:
-#   1. Adds an HSTS response header.
+#   1. Sets security headers (HSTS, nosniff, X-Frame-Options, Referrer-Policy) on
+#      every response and strips X-Powered-By; adds a locked-down CSP for static
+#      assets (PHP-rendered HTML keeps PrivateBin's own richer CSP).
 #   2. Blocks direct HTTP access to source / metadata files. PrivateBin normally
 #      protects these with .htaccess, but Caddy ignores .htaccess.
 # The root and file_server/php_server handling are unchanged from the default.
@@ -35,8 +37,21 @@
 
 	encode zstd br gzip
 
-	# --- delta 1: HSTS (clients receive responses over HTTPS via Railway's edge) ---
-	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	# --- delta 1: security headers on EVERY response ---
+	# PrivateBin sets CSP / X-Frame-Options / nosniff in PHP, so static assets
+	# (served directly by Caddy, bypassing PHP) miss them. Set them here so every
+	# response is covered, and strip the PHP version banner (X-Powered-By).
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy no-referrer
+		-X-Powered-By
+	}
+	# Static assets don't create a document context; give them a locked-down CSP.
+	# The app's richer CSP still applies to PHP-rendered HTML (these paths don't match).
+	@assets path *.css *.js *.mjs *.map *.wasm *.png *.jpg *.jpeg *.gif *.svg *.ico *.webp *.woff *.woff2 *.ttf *.json *.txt *.webmanifest *.xml
+	header @assets Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; sandbox"
 
 	# --- delta 2: never serve source/metadata files as static content ---
 	# NB: does NOT match manifest.json / robots.txt / app assets (css,js,img).
