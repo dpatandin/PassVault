@@ -42,11 +42,15 @@ selection, compression, and the URL shortener.
 
 ## Security
 
-- Served over **HTTPS** with **HSTS** (`Strict-Transport-Security`).
-- Strict **Content-Security-Policy** (`default-src 'none'`, `script-src 'self'`,
-  `frame-ancestors 'none'`, sandboxed), `X-Frame-Options: deny`,
-  `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
-  `Secure` + `SameSite=Lax` cookies.
+- Served over **HTTPS** with **HSTS** (`max-age=1y; includeSubDomains; preload`).
+- **Security headers on every response** — set at the Caddy layer (not just in
+  PHP) so static assets get them too: `X-Content-Type-Options: nosniff`,
+  `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`; `X-Powered-By` stripped.
+- Strict **Content-Security-Policy** on HTML (`default-src 'none'`,
+  `script-src 'self'`, `frame-ancestors 'none'`, sandboxed) with
+  **`connect-src 'self'`** (tightened from the upstream `*` default); static
+  assets get a locked-down `default-src 'none'` CSP. `Secure` + `SameSite=Lax`
+  cookies.
 - Fronted by **Cloudflare** (proxied, SSL/TLS mode **Full**); TLS is terminated
   at the edge. **Zero-knowledge is preserved** — content is encrypted in the
   browser and the key lives in the URL fragment (`#…`), so neither Cloudflare nor
@@ -55,7 +59,10 @@ selection, compression, and the URL shortener.
   (`*.md`, `composer.*`, `/vendor/*`, `/bin/*`, `/tst/*`, `/cfg/*`, …), since
   Caddy does not honor PrivateBin's `.htaccess` protections.
 - Runs a current, supported PHP (8.4) and PrivateBin (2.0.5, which fixes
-  CVE-2026-55891).
+  CVE-2026-55891); bundled **DOMPurify pinned to 3.4.12**.
+- Header/CSP hardening was validated against an OWASP **ZAP** scan; remaining ZAP
+  items (cookies without `HttpOnly` — UI-preference cookies the JS must read; and
+  Unix-timestamp cache-busters) are by-design and accepted.
 
 ## Configuration
 
@@ -131,9 +138,14 @@ customizations on upgrade:
   `js/privatebin.js` that parses plural units (so the `3days` expiry key works).
 - **Asset cache-busting** — `lib/View.php` appends the file mtime to
   non-versioned assets so edits reload reliably.
-- **Deployment glue** — `/Caddyfile` (HSTS + path blocking), `bin/update-sri.py`,
-  PHP version pin, `robots.txt` opt-out; `conf.php` `basepath` and
-  `[traffic] header = CF_CONNECTING_IP`.
+- **Security hardening** — `/Caddyfile` sets security headers on all responses
+  (HSTS, nosniff, `X-Frame-Options`, `Referrer-Policy`), strips `X-Powered-By`,
+  blocks source/metadata paths, and applies a locked-down CSP to static assets;
+  `conf.php` `cspheader` tightens `connect-src` to `'self'`; **DOMPurify bumped
+  to 3.4.12** (`js/purify-3.4.12.js` + template refs + SRI — re-check on re-base,
+  as upstream may ship a different version).
+- **Deployment glue** — `bin/update-sri.py`, PHP version pin, `robots.txt`
+  opt-out; `conf.php` `basepath` and `[traffic] header = CF_CONNECTING_IP`.
 - **Trimmed** — English-only i18n; `symfony/polyfill-php80` dropped (inert on
   PHP 8+).
 
