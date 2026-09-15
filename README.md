@@ -17,7 +17,7 @@ tuned for a specific deployment. See [Relationship to PrivateBin](#relationship-
 | | |
 |---|---|
 | Live URL | **https://passvault.info** |
-| Upstream base | PrivateBin **2.0.5** |
+| Upstream base | PrivateBin **2.0.6** |
 | Runtime | **PHP 8.4** (FrankenPHP) |
 | Front-end template | **Bootstrap 5** |
 | Storage | Filesystem (`/app/data`, persistent volume) |
@@ -64,8 +64,8 @@ selection, compression, and the URL shortener.
 - A custom `Caddyfile` returns **404** for source/metadata paths
   (`*.md`, `composer.*`, `/vendor/*`, `/bin/*`, `/tst/*`, `/cfg/*`, …), since
   Caddy does not honor PrivateBin's `.htaccess` protections.
-- Runs a current, supported PHP (8.4) and PrivateBin (2.0.5, which fixes
-  CVE-2026-55891); bundled **DOMPurify pinned to 3.4.12**.
+- Runs a current, supported PHP (8.4) and PrivateBin **2.0.6** (latest; ships
+  **DOMPurify 3.4.12**).
 - Header/CSP hardening was validated against OWASP **ZAP** scans. The remaining
   findings are by-design and accepted: cookies without `HttpOnly` (UI-preference
   cookies the JS must read — no secrets), Unix-timestamp cache-busters
@@ -152,9 +152,8 @@ customizations on upgrade:
   blocks source/metadata paths, and applies a locked-down CSP as a *default*
   (Caddy `?Content-Security-Policy`) to every response that lacks one — static
   assets and 404s — without overriding the app's HTML CSP; `conf.php` `cspheader`
-  tightens `connect-src` to `'self'`; **DOMPurify bumped to 3.4.12**
-  (`js/purify-3.4.12.js` + template refs + SRI — re-check on re-base, as upstream
-  may ship a different version).
+  tightens `connect-src` to `'self'`. (DOMPurify 3.4.12 now ships from upstream
+  since 2.0.6, so it is no longer a fork override.)
 - **Deployment glue** — `bin/update-sri.py`, PHP version pin, `robots.txt`
   opt-out; `conf.php` `basepath` and `[traffic] header = CF_CONNECTING_IP`.
 - **Trimmed** — English-only i18n; `symfony/polyfill-php80` dropped (inert on
