@@ -66,9 +66,12 @@ selection, compression, and the URL shortener.
   Caddy does not honor PrivateBin's `.htaccess` protections.
 - Runs a current, supported PHP (8.4) and PrivateBin (2.0.5, which fixes
   CVE-2026-55891); bundled **DOMPurify pinned to 3.4.12**.
-- Header/CSP hardening was validated against an OWASP **ZAP** scan; remaining ZAP
-  items (cookies without `HttpOnly` — UI-preference cookies the JS must read; and
-  Unix-timestamp cache-busters) are by-design and accepted.
+- Header/CSP hardening was validated against OWASP **ZAP** scans. The remaining
+  findings are by-design and accepted: cookies without `HttpOnly` (UI-preference
+  cookies the JS must read — no secrets), Unix-timestamp cache-busters
+  (`?v=<mtime>`), and missing CSP/anti-clickjacking headers on the
+  Cloudflare-generated `http`→`https` **redirect** (a 301 has no rendered body to
+  clickjack or inject into).
 
 ## Configuration
 
