@@ -145,6 +145,10 @@ customizations on upgrade:
   `tpl/bootstrap5.php` after `privatebin.css`.
 - **Custom 3-day expiry** — a rewritten `Helper.durationToSeconds` in
   `js/privatebin.js` that parses plural units (so the `3days` expiry key works).
+- **defaultformatter fix** — `Controller.newPaste()` in `js/privatebin.js` reads
+  `Model.getFormatDefault()` instead of hardcoding `'plaintext'`, so
+  `defaultformatter` (set to **`markdown`**) is honored on load and on "New".
+  Upstream bug — worth removing this patch once fixed upstream.
 - **Asset cache-busting** — `lib/View.php` appends the file mtime to
   non-versioned assets so edits reload reliably.
 - **Security hardening** — `/Caddyfile` sets security headers on all responses
