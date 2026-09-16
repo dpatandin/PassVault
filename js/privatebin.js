@@ -5869,9 +5869,11 @@ jQuery.PrivateBin = (function($) {
             AttachmentViewer.removeAttachment();
             TopNav.resetInput();
 
-            // reset format
-            PasteViewer.setFormat('plaintext');
-            TopNav.setFormat('plaintext');
+            // reset format to the configured default (PassVault fix: upstream
+            // hardcodes 'plaintext' here, overriding the defaultformatter config)
+            const formatDefault = Model.getFormatDefault() || 'plaintext';
+            PasteViewer.setFormat(formatDefault);
+            TopNav.setFormat(formatDefault);
 
             TopNav.showCreateButtons();
 
